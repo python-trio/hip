@@ -709,11 +709,11 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
                 **response_kw
             )
 
-        def drain_and_release_conn(response):
+        async def drain_and_release_conn(response):
             try:
                 # discard any remaining response body, the connection will be
                 # released back to the pool once the entire response is read
-                response.read()
+                await response.read()
             except (TimeoutError, SocketError, ProtocolError, BaseSSLError, SSLError):
                 pass
 
@@ -726,12 +726,12 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
                 if retries.raise_on_status:
                     # Drain and release the connection for this response, since
                     # we're not returning it to be released manually.
-                    drain_and_release_conn(response)
+                    await drain_and_release_conn(response)
                     raise
                 return response
 
             # drain and return the connection to the pool before recursing
-            drain_and_release_conn(response)
+            await drain_and_release_conn(response)
 
             retries.sleep(response)
             log.debug("Retry: %s", url)

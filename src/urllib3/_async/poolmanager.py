@@ -371,7 +371,7 @@ class PoolManager(RequestMethods):
 
         retries.sleep_for_retry(response)
         log.info("Redirecting %s -> %s", url, redirect_location)
-        return self.urlopen(method, redirect_location, **kw)
+        return await self.urlopen(method, redirect_location, **kw)
 
 
 class ProxyManager(PoolManager):
