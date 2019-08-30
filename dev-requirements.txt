@@ -17,7 +17,8 @@ pylint<2.0;python_version<="2.7"
 gcp-devrel-py-tools
 
 # optional dependencies, only intended for use with Python 3.5+
-trio==0.3.0; python_version >= "3.5"
+trio==0.13.0; python_version >= "3.5"
+pytest-trio==0.5.2;python_version>="3.5"
 # https://github.com/mhammond/pywin32/issues/1439
 pywin32!=226; python_version >= "3.5" and os_name == 'nt'
 twisted[tls]==19.2.0; python_version >= "3.5" and os_name != 'nt'
