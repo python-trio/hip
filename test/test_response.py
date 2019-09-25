@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 import zlib
 
 from io import BytesIO, BufferedReader, TextIOWrapper
@@ -349,7 +350,7 @@ class TestResponse(object):
                 # method which is provided by `BufferedReader` wrapper
                 resp = BufferedReader(resp)
             list(TextIOWrapper(resp))
-        assert str(ctx.value) == "I/O operation on closed file."
+        assert re.match("I/O operation on closed file.?", str(ctx.value))
 
     def test_streaming(self):
         fp = [b"fo", b"o"]
