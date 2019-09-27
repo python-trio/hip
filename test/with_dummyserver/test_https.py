@@ -295,7 +295,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             except MaxRetryError as e:
                 assert isinstance(e.reason, SSLError)
                 assert "certificate verify failed" in str(e.reason), (
-                    "Expected 'certificate verify failed'," "instead got: %r" % e.reason
+                    "Expected 'certificate verify failed', instead got: %r" % e.reason
                 )
 
     def test_verified_without_ca_certs(self):
@@ -405,7 +405,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             "localhost", self.port, cert_reqs="CERT_REQUIRED", ca_certs=DEFAULT_CA
         ) as https_pool:
             https_pool.assert_fingerprint = (
-                "F2:06:5A:42:10:3F:45:1C:17:FE:E6:" "07:1E:8A:86:E5"
+                "F2:06:5A:42:10:3F:45:1C:17:FE:E6:07:1E:8A:86:E5"
             )
 
             https_pool.request("GET", "/")
@@ -415,7 +415,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             "localhost", self.port, cert_reqs="CERT_REQUIRED", ca_certs=DEFAULT_CA
         ) as https_pool:
             https_pool.assert_fingerprint = (
-                "92:81:FE:85:F7:0C:26:60:EC:D6:B3:" "BF:93:CF:F9:71:CC:07:7D:0A"
+                "92:81:FE:85:F7:0C:26:60:EC:D6:B3:BF:93:CF:F9:71:CC:07:7D:0A"
             )
             https_pool.request("GET", "/")
 
@@ -435,7 +435,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             "127.0.0.1", self.port, cert_reqs="CERT_REQUIRED", ca_certs=DEFAULT_CA
         ) as https_pool:
             https_pool.assert_fingerprint = (
-                "AA:AA:AA:AA:AA:AAAA:AA:AAAA:AA:" "AA:AA:AA:AA:AA:AA:AA:AA:AA"
+                "AA:AA:AA:AA:AA:AAAA:AA:AAAA:AA:AA:AA:AA:AA:AA:AA:AA:AA:AA"
             )
 
             def _test_request(pool):
@@ -460,7 +460,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             "127.0.0.1", self.port, cert_reqs="CERT_NONE", ca_certs=DEFAULT_CA_BAD
         ) as https_pool:
             https_pool.assert_fingerprint = (
-                "AA:AA:AA:AA:AA:AAAA:AA:AAAA:AA:" "AA:AA:AA:AA:AA:AA:AA:AA:AA"
+                "AA:AA:AA:AA:AA:AAAA:AA:AAAA:AA:AA:AA:AA:AA:AA:AA:AA:AA:AA"
             )
             with pytest.raises(MaxRetryError) as cm:
                 https_pool.request("GET", "/", retries=0)
@@ -471,7 +471,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             "127.0.0.1", self.port, cert_reqs="CERT_NONE", ca_certs=DEFAULT_CA_BAD
         ) as https_pool:
             https_pool.assert_fingerprint = (
-                "92:81:FE:85:F7:0C:26:60:EC:D6:B3:" "BF:93:CF:F9:71:CC:07:7D:0A"
+                "92:81:FE:85:F7:0C:26:60:EC:D6:B3:BF:93:CF:F9:71:CC:07:7D:0A"
             )
             https_pool.request("GET", "/")
 
@@ -485,7 +485,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             "127.0.0.1", self.port, cert_reqs="CERT_REQUIRED", ca_certs=DEFAULT_CA
         ) as https_pool:
             https_pool.assert_fingerprint = (
-                "92:81:FE:85:F7:0C:26:60:EC:D6:B3:" "BF:93:CF:F9:71:CC:07:7D:0A"
+                "92:81:FE:85:F7:0C:26:60:EC:D6:B3:BF:93:CF:F9:71:CC:07:7D:0A"
             )
             https_pool.request("GET", "/")
 
@@ -511,7 +511,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             cert_reqs="CERT_REQUIRED",
         ) as https_pool:
             https_pool.assert_fingerprint = (
-                "92:81:FE:85:F7:0C:26:60:EC:D6:B3:" "BF:93:CF:F9:71:CC:07:7D:0A"
+                "92:81:FE:85:F7:0C:26:60:EC:D6:B3:BF:93:CF:F9:71:CC:07:7D:0A"
             )
 
         timeout = Timeout(total=None)

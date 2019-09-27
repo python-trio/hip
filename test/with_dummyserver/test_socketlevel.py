@@ -1088,7 +1088,7 @@ class TestProxyManager(SocketDummyServerTestCase):
             if not s.startswith("CONNECT "):
                 sock.send(
                     (
-                        "HTTP/1.1 405 Method not allowed\r\n" "Allow: CONNECT\r\n\r\n"
+                        "HTTP/1.1 405 Method not allowed\r\nAllow: CONNECT\r\n\r\n"
                     ).encode("utf-8")
                 )
                 sock.close()
@@ -1323,7 +1323,7 @@ class TestSSL(SocketDummyServerTestCase):
 
         self._start_server(socket_handler)
         # GitHub's fingerprint. Valid, but not matching.
-        fingerprint = "A0:C4:A7:46:00:ED:A7:2D:C0:BE:CB" ":9A:8C:B6:07:CA:58:EE:74:5E"
+        fingerprint = "A0:C4:A7:46:00:ED:A7:2D:C0:BE:CB:9A:8C:B6:07:CA:58:EE:74:5E"
 
         def request():
             pool = HTTPSConnectionPool(
@@ -1539,9 +1539,7 @@ class TestHeaders(SocketDummyServerTestCase):
                 parsed_headers[key.decode("ascii")] = value.decode("ascii")
 
             sock.send(
-                ("HTTP/1.1 204 No Content\r\n" "Content-Length: 0\r\n" "\r\n").encode(
-                    "utf-8"
-                )
+                ("HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n\r\n").encode("utf-8")
             )
 
             sock.close()
@@ -1585,9 +1583,9 @@ class TestHeaders(SocketDummyServerTestCase):
                 )
 
             sock.send(
-                (
-                    u"HTTP/1.1 204 No Content\r\n" u"Content-Length: 0\r\n" u"\r\n"
-                ).encode("ascii")
+                (u"HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n\r\n").encode(
+                    "ascii"
+                )
             )
 
             sock.close()
@@ -1615,9 +1613,9 @@ class TestHeaders(SocketDummyServerTestCase):
                     received_headers.append(header)
 
             sock.send(
-                (
-                    u"HTTP/1.1 204 No Content\r\n" u"Content-Length: 0\r\n" u"\r\n"
-                ).encode("ascii")
+                (u"HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n\r\n").encode(
+                    "ascii"
+                )
             )
 
             sock.close()
