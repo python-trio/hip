@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import zlib
 
-from io import BytesIO, BufferedReader
+from io import BytesIO, BufferedReader, TextIOWrapper
 
 import pytest
+import six
 
 from urllib3.base import Response
 from urllib3.response import HTTPResponse, brotli
@@ -305,6 +308,14 @@ class TestResponse(object):
         br.close()
         assert resp.closed
 
+        # HTTPResponse.read() by default closes the response
+        # https://github.com/urllib3/urllib3/issues/1305
+        fp = BytesIO(b"hello\nworld")
+        resp = HTTPResponse(fp, preload_content=False)
+        with pytest.raises(ValueError) as ctx:
+            list(BufferedReader(resp))
+        assert str(ctx.value) == "readline of closed file"
+
         b = b"!tenbytes!"
         fp = BytesIO(b)
         resp = HTTPResponse(fp, preload_content=False)
@@ -315,6 +326,30 @@ class TestResponse(object):
         assert len(br.read(5)) == 5
         assert len(br.read(5)) == 5
         assert len(br.read(5)) == 0
+
+    def test_io_textiowrapper(self):
+        fp = BytesIO(b"\xc3\xa4\xc3\xb6\xc3\xbc\xc3\x9f")
+        resp = HTTPResponse(fp, preload_content=False)
+        br = TextIOWrapper(resp, encoding="utf8")
+
+        assert br.read() == u"äöüß"
+
+        br.close()
+        assert resp.closed
+
+        # HTTPResponse.read() by default closes the response
+        # https://github.com/urllib3/urllib3/issues/1305
+        fp = BytesIO(
+            b"\xc3\xa4\xc3\xb6\xc3\xbc\xc3\x9f\n\xce\xb1\xce\xb2\xce\xb3\xce\xb4"
+        )
+        resp = HTTPResponse(fp, preload_content=False)
+        with pytest.raises(ValueError) as ctx:
+            if six.PY2:
+                # py2's implementation of TextIOWrapper requires `read1`
+                # method which is provided by `BufferedReader` wrapper
+                resp = BufferedReader(resp)
+            list(TextIOWrapper(resp))
+        assert str(ctx.value) == "I/O operation on closed file."
 
     def test_streaming(self):
         fp = [b"fo", b"o"]
