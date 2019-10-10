@@ -24,8 +24,17 @@ Upcoming 2.0 Changes
   useful to persist them up to the user.
 
 * Removed ``BodyNotHttplibCompatible`` and ``ResponseNotChunked`` exceptions.
-dev (master)
-------------
+
+1.25.5 (2019-09-19)
+-------------------
+
+* Add mitigation for BPO-37428 affecting Python <3.7.4 and OpenSSL 1.1.1+ which
+  caused certificate verification to be enabled when using ``cert_reqs=CERT_NONE``.
+  (Issue #1682)
+
+
+1.25.4 (2019-09-19)
+-------------------
 
 * Propagate Retry-After header settings to subsequent retries. (Pull #1607)
 
@@ -39,6 +48,8 @@ dev (master)
 
 * Add support for ``HTTPResponse.auto_close = False`` which makes HTTP responses
   work well with BufferedReaders and other ``io`` module features. (Pull #1652)
+
+* Percent-encode invalid characters in URL for ``HTTPConnectionPool.request()`` (Pull #1673)
 
 
 1.25.3 (2019-05-23)

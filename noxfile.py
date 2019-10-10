@@ -21,9 +21,8 @@ def tests_impl(session, extras="socks,secure,brotli"):
         "pytest",
         "-r",
         "a",
-        "test",
         "--cov=urllib3",
-        *session.posargs,
+        *(session.posargs or ("test/",)),
         env={"PYTHONWARNINGS": "always::DeprecationWarning"}
     )
     session.run("coverage", "xml")
