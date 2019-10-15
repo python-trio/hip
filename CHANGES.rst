@@ -25,6 +25,15 @@ Upcoming 2.0 Changes
 
 * Removed ``BodyNotHttplibCompatible`` and ``ResponseNotChunked`` exceptions.
 
+dev (master)
+------------
+1.25.6 (2019-09-24)
+-------------------
+
+* Fix issue where tilde (``~``) characters were incorrectly
+  percent-encoded in the path. (Pull #1692)
+
+
 1.25.5 (2019-09-19)
 -------------------
 

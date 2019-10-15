@@ -81,7 +81,9 @@ class TestHTTPProxyManager(HTTPDummyProxyTestCase):
                 self.fail("Didn't raise SSL error with wrong CA")
             except MaxRetryError as e:
                 assert isinstance(e.reason, SSLError)
-                assert "certificate verify failed" in str(e.reason)
+                assert "certificate verify failed" in str(e.reason), (
+                    "Expected 'certificate verify failed', instead got: %r" % e.reason
+                )
 
         with proxy_from_url(
             self.proxy_url, cert_reqs="REQUIRED", ca_certs=DEFAULT_CA
