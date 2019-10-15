@@ -183,7 +183,6 @@ class TestHTTPS(HTTPSDummyServerTestCase):
                 cert_file=client_cert,
                 key_password=None,
             )
-
         assert "password is required" in str(e.value)
 
     def test_verified(self):
