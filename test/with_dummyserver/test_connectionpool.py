@@ -319,29 +319,29 @@ class TestConnectionPool(HTTPDummyServerTestCase):
         """Test that connections accept socket options."""
         # This test needs to be here in order to be run. socket.create_connection actually tries to
         # connect to the host provided so we need a dummyserver to be running.
-        pool = HTTPConnectionPool(
+        with HTTPConnectionPool(
             self.host,
             self.port,
             socket_options=[(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)],
-        )
-        conn = pool._new_conn()
-        conn.connect()
-        s = conn._sock
-        using_keepalive = s.getsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE) > 0
-        assert using_keepalive
-        s.close()
+        ) as pool:
+            conn = pool._new_conn()
+            conn.connect()
+            s = conn._sock
+            using_keepalive = s.getsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE) > 0
+            assert using_keepalive
+            s.close()
 
     def test_disable_default_socket_options(self):
         """Test that passing None disables all socket options."""
         # This test needs to be here in order to be run. socket.create_connection actually tries
         # to connect to the host provided so we need a dummyserver to be running.
-        pool = HTTPConnectionPool(self.host, self.port, socket_options=None)
-        conn = pool._new_conn()
-        conn.connect()
-        s = conn._sock
-        using_nagle = s.getsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY) == 0
-        assert using_nagle
-        s.close()
+        with HTTPConnectionPool(self.host, self.port, socket_options=None) as pool:
+            conn = pool._new_conn()
+            conn.connect()
+            s = conn._sock
+            using_nagle = s.getsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY) == 0
+            assert using_nagle
+            s.close()
 
     def test_defaults_are_applied(self):
         """Test that modifying the default socket options works."""
@@ -372,12 +372,12 @@ class TestConnectionPool(HTTPDummyServerTestCase):
     def test_connection_error_retries(self):
         """ ECONNREFUSED error should raise a connection error, with retries """
         port = find_unused_port()
-        pool = HTTPConnectionPool(self.host, port)
-        try:
-            pool.request("GET", "/", retries=Retry(connect=3))
-            self.fail("Should have failed with a connection error.")
-        except MaxRetryError as e:
-            assert type(e.reason) == NewConnectionError
+        with HTTPConnectionPool(self.host, port) as pool:
+            try:
+                pool.request("GET", "/", retries=Retry(connect=3))
+                self.fail("Should have failed with a connection error.")
+            except MaxRetryError as e:
+                assert type(e.reason) == NewConnectionError
 
     def test_timeout_success(self):
         timeout = Timeout(connect=3, read=5, total=None)
@@ -395,12 +395,12 @@ class TestConnectionPool(HTTPDummyServerTestCase):
             pool.request("GET", "/")
 
     def test_bad_connect(self):
-        pool = HTTPConnectionPool("badhost.invalid", self.port)
-        try:
-            pool.request("GET", "/", retries=5)
-            self.fail("should raise timeout exception here")
-        except MaxRetryError as e:
-            assert type(e.reason) == NewConnectionError
+        with HTTPConnectionPool("badhost.invalid", self.port) as pool:
+            try:
+                pool.request("GET", "/", retries=5)
+                self.fail("should raise timeout exception here")
+            except MaxRetryError as e:
+                assert type(e.reason) == NewConnectionError
 
     def test_keepalive(self):
         with HTTPConnectionPool(self.host, self.port, block=True, maxsize=1) as pool:
@@ -567,59 +567,58 @@ class TestConnectionPool(HTTPDummyServerTestCase):
         # This test is sad and confusing. Need to figure out what's
         # going on with partial reads and socket reuse.
 
-        pool = HTTPConnectionPool(
+        with HTTPConnectionPool(
             self.host, self.port, block=True, maxsize=1, timeout=2
-        )
+        ) as pool:
+            payload_size = 1024 * 2
+            first_chunk = 512
 
-        payload_size = 1024 * 2
-        first_chunk = 512
+            boundary = "foo"
 
-        boundary = "foo"
+            req_data = {"count": "a" * payload_size}
+            resp_data = encode_multipart_formdata(req_data, boundary=boundary)[0]
 
-        req_data = {"count": "a" * payload_size}
-        resp_data = encode_multipart_formdata(req_data, boundary=boundary)[0]
+            req2_data = {"count": "b" * payload_size}
+            resp2_data = encode_multipart_formdata(req2_data, boundary=boundary)[0]
 
-        req2_data = {"count": "b" * payload_size}
-        resp2_data = encode_multipart_formdata(req2_data, boundary=boundary)[0]
-
-        r1 = pool.request(
-            "POST",
-            "/echo",
-            fields=req_data,
-            multipart_boundary=boundary,
-            preload_content=False,
-        )
-
-        first_data = r1.read(first_chunk)
-        assert len(first_data) > 0
-        assert first_data == resp_data[: len(first_data)]
-
-        try:
-            r2 = pool.request(
+            r1 = pool.request(
                 "POST",
                 "/echo",
-                fields=req2_data,
+                fields=req_data,
                 multipart_boundary=boundary,
                 preload_content=False,
-                pool_timeout=0.001,
             )
 
-            # This branch should generally bail here, but maybe someday it will
-            # work? Perhaps by some sort of magic. Consider it a TODO.
+            first_data = r1.read(first_chunk)
+            assert len(first_data) > 0
+            assert first_data == resp_data[: len(first_data)]
 
-            second_data = r2.read(first_chunk)
-            assert len(second_data) > 0
-            assert second_data == resp2_data[: len(second_data)]
+            try:
+                r2 = pool.request(
+                    "POST",
+                    "/echo",
+                    fields=req2_data,
+                    multipart_boundary=boundary,
+                    preload_content=False,
+                    pool_timeout=0.001,
+                )
 
-            assert r1.read() == resp_data[len(first_data) :]
-            assert r2.read() == resp2_data[len(second_data) :]
-            assert pool.num_requests == 2
+                # This branch should generally bail here, but maybe someday it will
+                # work? Perhaps by some sort of magic. Consider it a TODO.
 
-        except EmptyPoolError:
-            assert r1.read() == resp_data[len(first_data) :]
-            assert pool.num_requests == 1
+                second_data = r2.read(first_chunk)
+                assert len(second_data) > 0
+                assert second_data == resp2_data[: len(second_data)]
 
-        assert pool.num_connections == 1
+                assert r1.read() == resp_data[len(first_data) :]
+                assert r2.read() == resp2_data[len(second_data) :]
+                assert pool.num_requests == 2
+
+            except EmptyPoolError:
+                assert r1.read() == resp_data[len(first_data) :]
+                assert pool.num_requests == 1
+
+            assert pool.num_connections == 1
 
     def test_for_double_release(self):
         MAXSIZE = 5
@@ -653,11 +652,11 @@ class TestConnectionPool(HTTPDummyServerTestCase):
 
     def test_connections_arent_released(self):
         MAXSIZE = 5
-        pool = HTTPConnectionPool(self.host, self.port, maxsize=MAXSIZE)
-        assert pool.pool.qsize() == MAXSIZE
+        with HTTPConnectionPool(self.host, self.port, maxsize=MAXSIZE) as pool:
+            assert pool.pool.qsize() == MAXSIZE
 
-        pool.request("GET", "/", preload_content=False)
-        assert pool.pool.qsize() == MAXSIZE - 1
+            pool.request("GET", "/", preload_content=False)
+            assert pool.pool.qsize() == MAXSIZE - 1
 
     def test_dns_error(self):
         pool = HTTPConnectionPool(
@@ -684,11 +683,11 @@ class TestConnectionPool(HTTPDummyServerTestCase):
 
     def test_source_address_error(self):
         for addr in INVALID_SOURCE_ADDRESSES:
-            pool = HTTPConnectionPool(
+            with HTTPConnectionPool(
                 self.host, self.port, source_address=addr, retries=False
-            )
-            with pytest.raises(NewConnectionError):
-                pool.request("GET", "/source_address?{0}".format(addr))
+            ) as pool:
+                with pytest.raises(NewConnectionError):
+                    pool.request("GET", "/source_address?{0}".format(addr))
 
     def test_stream_keepalive(self):
         x = 2

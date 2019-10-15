@@ -1892,15 +1892,14 @@ class TestAutomaticHeaderInsertion(SocketDummyServerTestCase):
             sock.close()
 
         self._start_server(socket_handler)
-        conn = HTTPConnectionPool(self.host, self.port)
+        with HTTPConnectionPool(self.host, self.port) as conn:
+            myfileobj = io.BytesIO(b"helloworld")
+            response = conn.request("POST", url="/", body=myfileobj)
+            assert response.status == 200
 
-        myfileobj = io.BytesIO(b"helloworld")
-        response = conn.request("POST", url="/", body=myfileobj)
-        assert response.status == 200
-
-        # Confirm we auto chunked the body.
-        assert b"transfer-encoding: chunked\r\n" in data[0]
-        assert data[0].endswith(b"a\r\nhelloworld\r\n0\r\n\r\n")
+            # Confirm we auto chunked the body.
+            assert b"transfer-encoding: chunked\r\n" in data[0]
+            assert data[0].endswith(b"a\r\nhelloworld\r\n0\r\n\r\n")
 
 
 class TestRetryPoolSizeDrainFail(SocketDummyServerTestCase):

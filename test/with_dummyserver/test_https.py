@@ -94,60 +94,62 @@ class TestHTTPS(HTTPSDummyServerTestCase):
 
     @fails_on_travis_gce
     def test_dotted_fqdn(self):
-        pool = HTTPSConnectionPool(self.host + ".", self.port, ca_certs=DEFAULT_CA)
-        r = pool.request("GET", "/")
-        assert r.status == 200, r.data
+        with HTTPSConnectionPool(
+            self.host + ".", self.port, ca_certs=DEFAULT_CA
+        ) as pool:
+            r = pool.request("GET", "/")
+            assert r.status == 200, r.data
 
     def test_client_intermediate(self):
         client_cert, client_key = (
             DEFAULT_CLIENT_CERTS["certfile"],
             DEFAULT_CLIENT_CERTS["keyfile"],
         )
-        https_pool = HTTPSConnectionPool(
+        with HTTPSConnectionPool(
             self.host,
             self.port,
             key_file=client_key,
             cert_file=client_cert,
             ca_certs=DEFAULT_CA,
-        )
-        r = https_pool.request("GET", "/certificate")
-        subject = json.loads(r.data.decode("utf-8"))
-        assert subject["organizationalUnitName"].startswith("Testing server cert")
+        ) as https_pool:
+            r = https_pool.request("GET", "/certificate")
+            subject = json.loads(r.data.decode("utf-8"))
+            assert subject["organizationalUnitName"].startswith("Testing server cert")
 
     def test_client_no_intermediate(self):
         client_cert, client_key = (
             DEFAULT_CLIENT_NO_INTERMEDIATE_CERTS["certfile"],
             DEFAULT_CLIENT_NO_INTERMEDIATE_CERTS["keyfile"],
         )
-        https_pool = HTTPSConnectionPool(
+        with HTTPSConnectionPool(
             self.host,
             self.port,
             cert_file=client_cert,
             key_file=client_key,
             ca_certs=DEFAULT_CA,
-        )
-        try:
-            https_pool.request("GET", "/certificate", retries=False)
-        except SSLError as e:
-            if not (
-                "alert unknown ca" in str(e)
-                or "invalid certificate chain" in str(e)
-                or "unknown Cert Authority" in str(e)
-                or
-                # https://github.com/urllib3/urllib3/issues/1422
-                "connection closed via error" in str(e)
-                or "WSAECONNRESET" in str(e)
-            ):
-                raise
-        except ProtocolError as e:
-            if not (
-                "An existing connection was forcibly closed by the remote host"
-                in str(e)
-                # Python 3.7.4+
-                or "WSAECONNRESET" in str(e)  # Windows
-                or "EPIPE" in str(e)  # macOS
-            ):
-                raise
+        ) as https_pool:
+            try:
+                https_pool.request("GET", "/certificate", retries=False)
+            except SSLError as e:
+                if not (
+                    "alert unknown ca" in str(e)
+                    or "invalid certificate chain" in str(e)
+                    or "unknown Cert Authority" in str(e)
+                    or
+                    # https://github.com/urllib3/urllib3/issues/1422
+                    "connection closed via error" in str(e)
+                    or "WSAECONNRESET" in str(e)
+                ):
+                    raise
+            except ProtocolError as e:
+                if not (
+                    "An existing connection was forcibly closed by the remote host"
+                    in str(e)
+                    # Python 3.7.4+
+                    or "WSAECONNRESET" in str(e)  # Windows
+                    or "EPIPE" in str(e)  # macOS
+                ):
+                    raise
 
     @requires_ssl_context_keyfile_password
     def test_client_key_password(self):
@@ -155,17 +157,17 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             DEFAULT_CLIENT_CERTS["certfile"],
             PASSWORD_CLIENT_KEYFILE,
         )
-        https_pool = HTTPSConnectionPool(
+        with HTTPSConnectionPool(
             self.host,
             self.port,
             ca_certs=DEFAULT_CA,
             key_file=client_key,
             cert_file=client_cert,
             key_password="letmein",
-        )
-        r = https_pool.request("GET", "/certificate")
-        subject = json.loads(r.data.decode("utf-8"))
-        assert subject["organizationalUnitName"].startswith("Testing server cert")
+        ) as https_pool:
+            r = https_pool.request("GET", "/certificate")
+            subject = json.loads(r.data.decode("utf-8"))
+            assert subject["organizationalUnitName"].startswith("Testing server cert")
 
     @requires_ssl_context_keyfile_password
     def test_client_encrypted_key_requires_password(self):
@@ -590,12 +592,12 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             assert str(RECENT_DATE) in warning.message.args[0]
 
     def _request_without_resource_warnings(self, method, url):
-        pool = HTTPSConnectionPool(
-            self.host, self.port, cert_reqs="CERT_REQUIRED", ca_certs=DEFAULT_CA
-        )
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            pool.request(method, url)
+            with HTTPSConnectionPool(
+                self.host, self.port, cert_reqs="CERT_REQUIRED", ca_certs=DEFAULT_CA
+            ) as pool:
+                pool.request(method, url)
 
         return [x for x in w if not isinstance(x.message, ResourceWarning)]
 
