@@ -1683,9 +1683,7 @@ class TestHeaders(SocketDummyServerTestCase):
                 parsed_headers[key.decode("ascii")] = value.decode("ascii")
 
             sock.send(
-                ("HTTP/1.1 204 No Content\r\n" "Content-Length: 0\r\n" "\r\n").encode(
-                    "utf-8"
-                )
+                ("HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n\r\n").encode("utf-8")
             )
 
             sock.close()
