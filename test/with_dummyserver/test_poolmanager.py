@@ -14,10 +14,10 @@ from urllib3.util.retry import Retry, RequestHistory
 
 class TestPoolManager(HTTPDummyServerTestCase):
     @classmethod
-    def setup_class(self):
-        super(TestPoolManager, self).setup_class()
-        self.base_url = "http://%s:%d" % (self.host, self.port)
-        self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
+    def setup_class(cls):
+        super(TestPoolManager, cls).setup_class()
+        cls.base_url = "http://%s:%d" % (cls.host, cls.port)
+        cls.base_url_alt = "http://%s:%d" % (cls.host_alt, cls.port)
 
     def test_redirect(self):
         with PoolManager() as http:
@@ -718,9 +718,9 @@ class TestFileBodiesOnRetryOrRedirect(HTTPDummyServerTestCase):
 @pytest.mark.skipif(not HAS_IPV6, reason="IPv6 is not supported on this system")
 class TestIPv6PoolManager(IPv6HTTPDummyServerTestCase):
     @classmethod
-    def setup_class(self):
-        super(TestIPv6PoolManager, self).setup_class()
-        self.base_url = "http://[%s]:%d" % (self.host, self.port)
+    def setup_class(cls):
+        super(TestIPv6PoolManager, cls).setup_class()
+        cls.base_url = "http://[%s]:%d" % (cls.host, cls.port)
 
     def test_ipv6(self):
         with PoolManager() as http:

@@ -1432,12 +1432,10 @@ class TestSSL(SocketDummyServerTestCase):
         context.options = 0
 
         with mock.patch("urllib3.util.ssl_.SSLContext", lambda *_, **__: context):
-
             self._start_server(socket_handler)
             with HTTPSConnectionPool(self.host, self.port) as pool:
                 with pytest.raises(MaxRetryError):
                     pool.request("GET", "/", timeout=0.01)
-
                 context.load_default_certs.assert_called_with()
 
     def test_ssl_dont_load_default_certs_when_given(self):
@@ -1486,7 +1484,6 @@ class TestSSL(SocketDummyServerTestCase):
                 with HTTPSConnectionPool(self.host, self.port, **kwargs) as pool:
                     with pytest.raises(MaxRetryError):
                         pool.request("GET", "/", timeout=0.01)
-
                     context.load_default_certs.assert_not_called()
 
 
@@ -1892,15 +1889,14 @@ class TestAutomaticHeaderInsertion(SocketDummyServerTestCase):
             sock.close()
 
         self._start_server(socket_handler)
-        conn = HTTPConnectionPool(self.host, self.port)
+        with HTTPConnectionPool(self.host, self.port) as conn:
+            myfileobj = io.BytesIO(b"helloworld")
+            response = conn.request("POST", url="/", body=myfileobj)
+            assert response.status == 200
 
-        myfileobj = io.BytesIO(b"helloworld")
-        response = conn.request("POST", url="/", body=myfileobj)
-        assert response.status == 200
-
-        # Confirm we auto chunked the body.
-        assert b"transfer-encoding: chunked\r\n" in data[0]
-        assert data[0].endswith(b"a\r\nhelloworld\r\n0\r\n\r\n")
+            # Confirm we auto chunked the body.
+            assert b"transfer-encoding: chunked\r\n" in data[0]
+            assert data[0].endswith(b"a\r\nhelloworld\r\n0\r\n\r\n")
 
 
 class TestRetryPoolSizeDrainFail(SocketDummyServerTestCase):
