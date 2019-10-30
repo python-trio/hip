@@ -11,6 +11,7 @@ pytest-cov==2.7.1
 h11==0.8.0
 cryptography==2.8
 flaky==3.6.1
+backports.tempfile==1.0
 
 # https://github.com/GoogleCloudPlatform/python-repo-tools/issues/23
 pylint<2.0;python_version<="2.7"
