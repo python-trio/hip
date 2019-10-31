@@ -39,6 +39,8 @@ from test import (
     requiresTLSv1_2,
     requiresTLSv1_3,
     TARPIT_HOST,
+    SHORT_TIMEOUT,
+    LONG_TIMEOUT,
 )
 from urllib3 import HTTPSConnectionPool
 from urllib3._sync.connection import RECENT_DATE
@@ -485,7 +487,8 @@ class TestHTTPS(HTTPSDummyServerTestCase):
 
     @requires_network
     def test_https_timeout(self):
-        timeout = Timeout(total=None, connect=0.001)
+
+        timeout = Timeout(total=None, connect=SHORT_TIMEOUT)
         with HTTPSConnectionPool(
             TARPIT_HOST,
             self.port,
@@ -519,7 +522,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
         with HTTPSConnectionPool(
             TARPIT_HOST,
             self.port,
-            timeout=Timeout(connect=0.001),
+            timeout=Timeout(connect=SHORT_TIMEOUT),
             retries=False,
             cert_reqs="CERT_REQUIRED",
         ) as https_pool:
@@ -532,12 +535,12 @@ class TestHTTPS(HTTPSDummyServerTestCase):
         with HTTPSConnectionPool(
             TARPIT_HOST,
             self.port,
-            timeout=Timeout(connect=5),
+            timeout=Timeout(connect=LONG_TIMEOUT),
             retries=False,
             cert_reqs="CERT_REQUIRED",
         ) as https_pool:
             with pytest.raises(ConnectTimeoutError):
-                https_pool.request("GET", "/", timeout=Timeout(connect=0.001))
+                https_pool.request("GET", "/", timeout=Timeout(connect=SHORT_TIMEOUT))
 
         with HTTPSConnectionPool(
             TARPIT_HOST,
@@ -547,10 +550,13 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             cert_reqs="CERT_REQUIRED",
         ) as https_pool:
             conn = https_pool._new_conn()
-            with pytest.raises(ConnectTimeoutError):
-                https_pool.request(
-                    "GET", "/", timeout=Timeout(total=None, connect=0.001)
-                )
+            try:
+                with pytest.raises(ConnectTimeoutError):
+                    https_pool.request(
+                        "GET", "/", timeout=Timeout(total=None, connect=SHORT_TIMEOUT)
+                    )
+            finally:
+                conn.close()
 
     def test_enhanced_ssl_connection(self):
         fingerprint = "92:81:FE:85:F7:0C:26:60:EC:D6:B3:BF:93:CF:F9:71:CC:07:7D:0A"

@@ -29,6 +29,7 @@ from socket import error as SocketError
 from ssl import SSLError as BaseSSLError
 
 from dummyserver.server import DEFAULT_CA
+from test import SHORT_TIMEOUT
 
 import h11
 
@@ -212,13 +213,13 @@ class TestConnectionPool(object):
 
     def test_max_connections(self):
         with HTTPConnectionPool(host="localhost", maxsize=1, block=True) as pool:
-            pool._get_conn(timeout=0.01)
+            pool._get_conn(timeout=SHORT_TIMEOUT)
 
             with pytest.raises(EmptyPoolError):
-                pool._get_conn(timeout=0.01)
+                pool._get_conn(timeout=SHORT_TIMEOUT)
 
             with pytest.raises(EmptyPoolError):
-                pool.request("GET", "/", pool_timeout=0.01)
+                pool.request("GET", "/", pool_timeout=SHORT_TIMEOUT)
 
             assert pool.num_connections == 1
 
@@ -290,7 +291,7 @@ class TestConnectionPool(object):
                 h11.RemoteProtocolError, ""
             )
             with pytest.raises(MaxRetryError):
-                pool.request("GET", "/", retries=1, pool_timeout=0.01)
+                pool.request("GET", "/", retries=1, pool_timeout=SHORT_TIMEOUT)
             assert pool.pool.qsize() == POOL_SIZE
 
     def test_pool_close(self):
@@ -345,9 +346,9 @@ class TestConnectionPool(object):
             assert pool.timeout._connect == Timeout.DEFAULT_TIMEOUT
             assert pool.timeout.total is None
 
-        with HTTPConnectionPool(host="localhost", timeout=3) as pool:
-            assert pool.timeout._read == 3
-            assert pool.timeout._connect == 3
+            pool = HTTPConnectionPool(host="localhost", timeout=SHORT_TIMEOUT)
+            assert pool.timeout._read == SHORT_TIMEOUT
+            assert pool.timeout._connect == SHORT_TIMEOUT
             assert pool.timeout.total is None
 
     def test_no_host(self):
