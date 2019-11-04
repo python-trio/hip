@@ -25,8 +25,14 @@ Upcoming 2.0 Changes
 
 * Removed ``BodyNotHttplibCompatible`` and ``ResponseNotChunked`` exceptions.
 
-dev (master)
+master (dev)
 ------------
+
+* Fix issue where URL fragment was sent within the request target. (Pull #1732)
+
+* Fix issue where an empty query section in a URL would fail to parse. (Pull #1732)
+
+
 1.25.6 (2019-09-24)
 -------------------
 
