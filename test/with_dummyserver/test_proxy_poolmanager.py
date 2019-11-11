@@ -11,6 +11,9 @@ from urllib3.poolmanager import proxy_from_url, ProxyManager
 from urllib3.exceptions import MaxRetryError, SSLError, ProxyError, ConnectTimeoutError
 from urllib3.connectionpool import connection_from_url
 
+# Retry failed tests
+pytestmark = pytest.mark.flaky
+
 
 class TestHTTPProxyManager(HTTPDummyProxyTestCase):
     @classmethod

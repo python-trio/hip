@@ -22,6 +22,7 @@ def tests_impl(session, extras="socks,secure,brotli"):
         "-r",
         "a",
         "--cov=urllib3",
+        "--no-success-flaky-report",
         *(session.posargs or ("test/",)),
         env={"PYTHONWARNINGS": "always::DeprecationWarning"}
     )

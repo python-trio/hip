@@ -10,6 +10,7 @@ pytest==4.6.4
 pytest-cov==2.7.1
 h11==0.8.0
 cryptography==2.6.1
+flaky==3.6.1
 
 # https://github.com/ionelmc/python-lazy-object-proxy/issues/30
 lazy-object-proxy==1.4.0
