@@ -71,9 +71,8 @@ class TestConnectionPoolTimeouts(SocketDummyServerTestCase):
             conn = pool._get_conn()
             pool._put_conn(conn)
             try:
-                pool.urlopen("GET", "/")
-                self.fail("The request should fail with a timeout error.")
-            except ReadTimeoutError:
+                with pytest.raises(ReadTimeoutError):
+                    pool.urlopen("GET", "/")
                 if conn._sock:
                     with pytest.raises(socket.error):
                         conn.sock.recv(1024)
@@ -375,11 +374,9 @@ class TestConnectionPool(HTTPDummyServerTestCase):
         """ ECONNREFUSED error should raise a connection error, with retries """
         port = find_unused_port()
         with HTTPConnectionPool(self.host, port) as pool:
-            try:
+            with pytest.raises(MaxRetryError) as e:
                 pool.request("GET", "/", retries=Retry(connect=3))
-                self.fail("Should have failed with a connection error.")
-            except MaxRetryError as e:
-                assert type(e.reason) == NewConnectionError
+            assert type(e.value.reason) == NewConnectionError
 
     def test_timeout_success(self):
         timeout = Timeout(connect=3, read=5, total=None)
@@ -398,11 +395,9 @@ class TestConnectionPool(HTTPDummyServerTestCase):
 
     def test_bad_connect(self):
         with HTTPConnectionPool("badhost.invalid", self.port) as pool:
-            try:
+            with pytest.raises(MaxRetryError) as e:
                 pool.request("GET", "/", retries=5)
-                self.fail("should raise timeout exception here")
-            except MaxRetryError as e:
-                assert type(e.reason) == NewConnectionError
+            assert type(e.value.reason) == NewConnectionError
 
     def test_keepalive(self):
         with HTTPConnectionPool(self.host, self.port, block=True, maxsize=1) as pool:
