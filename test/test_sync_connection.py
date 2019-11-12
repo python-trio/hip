@@ -136,7 +136,7 @@ class ScenarioSocket(object):
         if event is not EVENT_SEND:
             raise ScenarioError("Expected EVENT_SEND, got %s" % event)
 
-        amount, = args
+        (amount,) = args
         self._raise_errors(amount)
         if amount is SEND_ALL:
             amount = len(data)
@@ -152,7 +152,7 @@ class ScenarioSocket(object):
         if event is not EVENT_RECV:
             raise ScenarioError("Expected EVENT_RECV, got %s" % event)
 
-        amount, = args
+        (amount,) = args
         self._raise_errors(amount)
         if amount is RECV_ALL:
             amount = min(len(RESPONSE), amt)

@@ -6,7 +6,6 @@ from urllib3 import HTTPConnectionPool
 from urllib3.exceptions import InvalidBodyError
 from urllib3.util.retry import Retry
 from dummyserver.testcase import SocketDummyServerTestCase, consume_socket
-import pytest
 
 # Retry failed tests
 pytestmark = pytest.mark.flaky

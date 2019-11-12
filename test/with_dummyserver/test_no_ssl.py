@@ -8,7 +8,6 @@ from ..test_no_ssl import TestWithoutSSL
 
 from dummyserver.testcase import HTTPDummyServerTestCase, HTTPSDummyServerTestCase
 
-import pytest
 import urllib3
 
 # Retry failed tests
