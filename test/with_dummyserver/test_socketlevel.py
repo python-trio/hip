@@ -50,6 +50,9 @@ import pytest
 
 from test import fails_on_travis_gce, requires_ssl_context_keyfile_password
 
+# Retry failed tests
+pytestmark = pytest.mark.flaky
+
 
 class TestCookies(SocketDummyServerTestCase):
     def test_multi_setcookie(self):
@@ -227,16 +230,10 @@ class TestClientCerts(SocketDummyServerTestCase):
         with HTTPSConnectionPool(
             self.host, self.port, cert_reqs="REQUIRED", ca_certs=DEFAULT_CA
         ) as pool:
-            try:
+            with pytest.raises(MaxRetryError):
                 pool.request("GET", "/", retries=0)
-            except MaxRetryError:
                 done_receiving.set()
-            else:
-                done_receiving.set()
-                self.fail(
-                    "Expected server to reject connection due to missing client "
-                    "certificates"
-                )
+            done_receiving.set()
 
     @requires_ssl_context_keyfile_password
     def test_client_cert_with_string_password(self):
@@ -842,8 +839,7 @@ class TestSocketClosing(SocketDummyServerTestCase):
 
             done_closing.set()  # wait until the socket in our pool gets closed
             successful = complete.wait(timeout=1)
-            if not successful:
-                self.fail("Timed out waiting for connection close")
+            assert successful, "Timed out waiting for connection close"
 
     def test_release_conn_param_is_respected_after_timeout_retry(self):
         """For successful ```urlopen()```, the connection isn't released, even
@@ -855,7 +851,7 @@ class TestSocketClosing(SocketDummyServerTestCase):
         would be released if the initial request failed, even if a retry
         succeeded.
 
-        [1] <https://github.com/shazow/urllib3/issues/651>
+        [1] <https://github.com/urllib3/urllib3/issues/651>
         """
 
         def socket_handler(listener):
@@ -1344,7 +1340,7 @@ class TestSSL(SocketDummyServerTestCase):
         with pytest.raises(MaxRetryError) as cm:
             request()
         assert isinstance(cm.value.reason, SSLError)
-        # Should not hang, see https://github.com/shazow/urllib3/issues/529
+        # Should not hang, see https://github.com/urllib3/urllib3/issues/529
         with pytest.raises(MaxRetryError):
             request()
 

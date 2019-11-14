@@ -402,7 +402,7 @@ class HTTP1Connection(object):
                         "back to check for a `commonName` for now. This "
                         "feature is being removed by major browsers and "
                         "deprecated by RFC 2818. (See "
-                        "https://github.com/shazow/urllib3/issues/497 for "
+                        "https://github.com/urllib3/urllib3/issues/497 for "
                         "details.)".format(self._host)
                     ),
                     SubjectAltNameWarning,

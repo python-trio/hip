@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import pytest
+
 from urllib3 import HTTPConnectionPool
 from urllib3.exceptions import InvalidBodyError
-from dummyserver.testcase import SocketDummyServerTestCase
-import pytest
+from urllib3.util.retry import Retry
+from dummyserver.testcase import SocketDummyServerTestCase, consume_socket
+
+# Retry failed tests
+pytestmark = pytest.mark.flaky
 
 
 class TestChunkedTransfer(SocketDummyServerTestCase):
@@ -97,3 +102,28 @@ class TestChunkedTransfer(SocketDummyServerTestCase):
 
             host_headers = [x for x in header_lines if x.startswith(b"host")]
             assert len(host_headers) == 1
+
+    def test_preserve_chunked_on_retry(self):
+        self.chunked_requests = 0
+
+        def socket_handler(listener):
+            for _ in range(2):
+                sock = listener.accept()[0]
+                request = consume_socket(sock)
+                if b"transfer-encoding: chunked" in request.split(b"\r\n"):
+                    self.chunked_requests += 1
+
+                sock.send(b"HTTP/1.1 404 Not Found\r\n\r\n")
+                sock.close()
+
+        self._start_server(socket_handler)
+        with HTTPConnectionPool(self.host, self.port) as pool:
+            retries = Retry(total=1, raise_on_status=False, status_forcelist=[404])
+            pool.urlopen(
+                "GET",
+                "/",
+                body=iter([b"chunk1", b"chunk2"]),
+                preload_content=False,
+                retries=retries,
+            )
+        assert self.chunked_requests == 2

@@ -37,14 +37,6 @@ DEFAULT_CERTS = {
 DEFAULT_CLIENT_CERTS = {
     "certfile": os.path.join(CERTS_PATH, "client_intermediate.pem"),
     "keyfile": os.path.join(CERTS_PATH, "client_intermediate.key"),
-    "subject": dict(
-        countryName=u"FI",
-        stateOrProvinceName=u"dummy",
-        organizationName=u"dummy",
-        organizationalUnitName=u"dummy",
-        commonName=u"SnakeOilClient",
-        emailAddress=u"dummy@test.local",
-    ),
 }
 DEFAULT_CLIENT_NO_INTERMEDIATE_CERTS = {
     "certfile": os.path.join(CERTS_PATH, "client_no_intermediate.pem"),
@@ -86,7 +78,7 @@ def _has_ipv6(host):
         # has_ipv6 returns true if cPython was compiled with IPv6 support.
         # It does not tell us if the system has IPv6 support enabled. To
         # determine that we must bind to an IPv6 address.
-        # https://github.com/shazow/urllib3/pull/611
+        # https://github.com/urllib3/urllib3/pull/611
         # https://bugs.python.org/issue658327
         try:
             sock = socket.socket(socket.AF_INET6)
@@ -102,7 +94,7 @@ def _has_ipv6(host):
 
 # Some systems may have IPv6 support but DNS may not be configured
 # properly. We can not count that localhost will resolve to ::1 on all
-# systems. See https://github.com/shazow/urllib3/pull/611 and
+# systems. See https://github.com/urllib3/urllib3/pull/611 and
 # https://bugs.python.org/issue18792
 HAS_IPV6_AND_DNS = _has_ipv6("localhost")
 HAS_IPV6 = _has_ipv6("::1")
