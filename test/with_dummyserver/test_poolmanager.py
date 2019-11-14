@@ -685,6 +685,7 @@ class TestFileBodiesOnRetryOrRedirect(HTTPDummyServerTestCase):
             with pytest.raises(UnrewindableBodyError) as e:
                 http.urlopen("PUT", url, headers=headers, body=body)
             assert "Unable to record file position for" in str(e.value)
+
     @pytest.mark.parametrize(
         ["target", "expected_target"],
         [
