@@ -11,6 +11,8 @@ from urllib3.poolmanager import PoolManager
 from urllib3.exceptions import MaxRetryError, NewConnectionError, UnrewindableBodyError
 from urllib3.util.retry import Retry, RequestHistory
 
+from test import LONG_TIMEOUT
+
 # Retry failed tests
 pytestmark = pytest.mark.flaky
 
@@ -90,7 +92,7 @@ class TestPoolManager(HTTPDummyServerTestCase):
                     "GET",
                     "%s/redirect" % self.base_url,
                     fields={"target": cross_host_location},
-                    timeout=1,
+                    timeout=LONG_TIMEOUT,
                     retries=0,
                 )
 
@@ -98,7 +100,7 @@ class TestPoolManager(HTTPDummyServerTestCase):
                 "GET",
                 "%s/redirect" % self.base_url,
                 fields={"target": "%s/echo?a=b" % self.base_url_alt},
-                timeout=1,
+                timeout=LONG_TIMEOUT,
                 retries=1,
             )
 
@@ -683,6 +685,25 @@ class TestFileBodiesOnRetryOrRedirect(HTTPDummyServerTestCase):
             with pytest.raises(UnrewindableBodyError) as e:
                 http.urlopen("PUT", url, headers=headers, body=body)
             assert "Unable to record file position for" in str(e.value)
+
+    @pytest.mark.parametrize(
+        ["target", "expected_target"],
+        [
+            ("/echo_uri?q=1#fragment", b"/echo_uri?q=1"),
+            ("/echo_uri?#", b"/echo_uri?"),
+            ("/echo_uri#?", b"/echo_uri"),
+            ("/echo_uri#?#", b"/echo_uri"),
+            ("/echo_uri??#", b"/echo_uri??"),
+            ("/echo_uri?%3f#", b"/echo_uri?%3F"),
+            ("/echo_uri?%3F#", b"/echo_uri?%3F"),
+            ("/echo_uri?[]", b"/echo_uri?%5B%5D"),
+        ],
+    )
+    def test_encode_http_target(self, target, expected_target):
+        with PoolManager() as http:
+            url = "http://%s:%d%s" % (self.host, self.port, target)
+            r = http.request("GET", url)
+            assert r.data == expected_target
 
 
 @pytest.mark.skipif(not HAS_IPV6, reason="IPv6 is not supported on this system")
