@@ -17,6 +17,12 @@ def load_sync_backend(kwargs):
     return SyncBackend(**kwargs)
 
 
+def load_anyio_backend(kwargs):
+    from .anyio_backend import AnyIOBackend
+
+    return AnyIOBackend(**kwargs)
+
+
 def load_trio_backend(kwargs):
     from .trio_backend import TrioBackend
 
@@ -36,6 +42,7 @@ def backend_directory():
     loaders = [
         Loader(name="sync", loader=load_sync_backend, is_async=False),
         Loader(name="trio", loader=load_trio_backend, is_async=True),
+        Loader(name="anyio", loader=load_anyio_backend, is_async=True),
         Loader(name="twisted", loader=load_twisted_backend, is_async=True),
     ]
     return {loader.name: loader for loader in loaders}
