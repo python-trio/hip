@@ -156,9 +156,6 @@ class HTTPResponse(io.IOBase):
 
     Extra parameters for behaviour not present in httplib.HTTPResponse:
 
-    :param preload_content:
-        If True, the response's body will be preloaded during construction.
-
     :param decode_content:
         If True, will attempt to decode the body based on the
         'content-encoding' header.
@@ -181,7 +178,6 @@ class HTTPResponse(io.IOBase):
         version=0,
         reason=None,
         strict=0,
-        preload_content=True,
         decode_content=True,
         original_response=None,
         pool=None,
@@ -221,9 +217,9 @@ class HTTPResponse(io.IOBase):
         self._pool = pool
         self._connection = connection
 
-        # If requested, preload the body.
-        if preload_content and not self._body:
-            self._body = self.read(decode_content=decode_content)
+    async def preload_content(self):
+        if not self._body:
+            self._body = await self.read(decode_content=self.decode_content)
 
     def get_redirect_location(self):
         """

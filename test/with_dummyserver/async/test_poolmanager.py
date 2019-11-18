@@ -17,6 +17,7 @@ class TestPoolManager(HTTPDummyServerTestCase):
                 fields={"target": "%s/" % self.base_url},
                 redirect=False,
             )
+
             assert r.status == 303
 
             r = await http.request(
@@ -26,4 +27,4 @@ class TestPoolManager(HTTPDummyServerTestCase):
             )
 
             assert r.status == 200
-            assert await r.read() == b"Dummy server!"
+            assert r.data == b"Dummy server!"
