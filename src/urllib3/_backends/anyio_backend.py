@@ -9,16 +9,20 @@ BUFSIZE = 65536
 
 # XX support connect_timeout and read_timeout
 
+
 class AnyIOBackend:
     async def connect(
-            self, host, port, connect_timeout, source_address=None, socket_options=None
+        self, host, port, connect_timeout, source_address=None, socket_options=None
     ):
         bind_host, bind_port = source_address or (None, None)
-        stream = await anyio.connect_tcp(host, port, bind_host=bind_host, bind_port=bind_port)
+        stream = await anyio.connect_tcp(
+            host, port, bind_host=bind_host, bind_port=bind_port
+        )
         for (level, optname, value) in socket_options:
             stream.setsockopt(level, optname, value)
 
         return AnyIOSocket(stream)
+
 
 # XX it turns out that we don't need SSLStream to be robustified against
 # cancellation, but we probably should do something to detect when the stream
@@ -41,7 +45,8 @@ class AnyIOSocket:
         return await self._stream.receive_some(BUFSIZE)
 
     async def send_and_receive_for_a_while(
-            self, produce_bytes, consume_bytes, read_timeout):
+        self, produce_bytes, consume_bytes, read_timeout
+    ):
         async def sender():
             while True:
                 outgoing = await produce_bytes()
