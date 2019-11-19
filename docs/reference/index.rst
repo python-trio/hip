@@ -16,14 +16,6 @@ Subpackages
 Submodules
 ----------
 
-urllib3.connection module
--------------------------
-
-.. automodule:: urllib3.sync_connection
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 urllib3.connectionpool module
 -----------------------------
 

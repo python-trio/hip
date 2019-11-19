@@ -16,6 +16,10 @@ print("--- urllib3 using Trio ---")
 import trio
 trio.run(main, "trio")
 
+print("\n--- urllib3 using AnyIO ---")
+import anyio
+anyio.run(main, "anyio")
+
 print("\n--- urllib3 using Twisted ---")
 from twisted.internet.task import react
 from twisted.internet.defer import ensureDeferred

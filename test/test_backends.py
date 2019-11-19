@@ -28,11 +28,16 @@ class TestNormalizeBackend(object):
         assert normalize_backend(None, async_mode=False) == Backend("sync")
 
         with pytest.raises(ValueError) as excinfo:
+            normalize_backend(Backend("anyio"), async_mode=False)
+        assert "anyio backend needs to be run in async mode" == str(excinfo.value)
+
+        with pytest.raises(ValueError) as excinfo:
             normalize_backend(Backend("trio"), async_mode=False)
         assert "trio backend needs to be run in async mode" == str(excinfo.value)
 
     @requires_async_pool_manager
     def test_async(self):
+        assert normalize_backend(Backend("anyio"), async_mode=True) == Backend("anyio")
         assert normalize_backend(Backend("trio"), async_mode=True) == Backend("trio")
         assert normalize_backend("twisted", async_mode=True) == Backend("twisted")
 

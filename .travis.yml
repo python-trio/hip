@@ -98,8 +98,6 @@ matrix:
         - ./_travis/deploy.sh
 
   allow_failures:
-    - python: 3.6
-      env: NOX_SESSION=docs
     # MacPython 3.5 only supports TLS 1.1 by default, which fails whenever
     # easy_install fetchs packages, which is required by Twisted. Giving up on
     # testing MacPython 3.5 on Travis for this reason.
