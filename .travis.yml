@@ -103,8 +103,6 @@ matrix:
         - ./_travis/deploy.sh
 
   allow_failures:
-    - python: 3.6
-      env: NOX_SESSION=docs
     - python: 3.4
       env: NOX_SESSION=test-3.4
     - language: generic
