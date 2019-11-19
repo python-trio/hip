@@ -28,14 +28,6 @@ urllib3.util.request module
     :undoc-members:
     :show-inheritance:
 
-urllib3.util.response module
-----------------------------
-
-.. automodule:: urllib3.util.response
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 urllib3.util.retry module
 -------------------------
 
