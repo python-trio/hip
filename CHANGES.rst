@@ -25,6 +25,8 @@ Upcoming 2.0 Changes
 
 * Removed ``BodyNotHttplibCompatible`` and ``ResponseNotChunked`` exceptions.
 
+* Removed support for Python 3.4.
+
 master (dev)
 ------------
 
