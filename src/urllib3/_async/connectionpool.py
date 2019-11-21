@@ -522,6 +522,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
         timeout=_Default,
         pool_timeout=None,
         body_pos=None,
+        preload_content=True,
         **response_kw
     ):
         """
@@ -577,6 +578,9 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
             Position to seek to in file-like body in the event of a retry or
             redirect. Typically this won't need to be set because urllib3 will
             auto-populate the value when needed.
+
+        :param preload_content:
+            If True, the response's body will be preloaded during construction.
 
         :param \\**response_kw:
             Additional parameters are passed to
@@ -641,6 +645,9 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
             response = self.ResponseCls.from_base(
                 base_response, pool=self, retries=retries, **response_kw
             )
+            # If requested, preload the body.
+            if preload_content:
+                await response.preload_content()
 
             # Everything went great!
             clean_exit = True
@@ -706,6 +713,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
                 timeout=timeout,
                 pool_timeout=pool_timeout,
                 body_pos=body_pos,
+                preload_content=preload_content,
                 **response_kw
             )
 
@@ -744,6 +752,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
                 timeout=timeout,
                 pool_timeout=pool_timeout,
                 body_pos=body_pos,
+                preload_content=preload_content,
                 **response_kw
             )
 
