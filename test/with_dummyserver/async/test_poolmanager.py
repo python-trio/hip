@@ -10,7 +10,7 @@ class TestPoolManager(HTTPDummyServerTestCase):
         self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
 
     async def test_redirect(self):
-        with AsyncPoolManager(backend="trio") as http:
+        with AsyncPoolManager() as http:
             r = await http.request(
                 "GET",
                 "%s/redirect" % self.base_url,
