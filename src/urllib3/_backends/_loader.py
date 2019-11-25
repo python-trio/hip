@@ -50,7 +50,12 @@ def backend_directory():
 
 def normalize_backend(backend, async_mode):
     if backend is None:
-        backend = Backend(name="sync")  # sync backend is the default
+        if not async_mode:
+            backend = Backend(name="sync")
+        else:
+            import sniffio
+
+            backend = Backend(name=sniffio.current_async_library())
     elif not isinstance(backend, Backend):
         backend = Backend(name=backend)
 
