@@ -1,0 +1,31 @@
+name: Continuous integration
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.5, 3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python.exe -m pip install --upgrade pip wheel nox
+    - name: Test
+      run: |
+        python.exe -m nox -s test-${{ matrix.python-version }}
+    - name: Coverage upload
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        python.exe -m pip install codecov
+        python.exe -m codecov
