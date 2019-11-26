@@ -1,7 +1,19 @@
+from xml.etree import ElementTree as ET
 import os
+import re
 import shutil
+import sys
 
 import nox
+
+
+def _clean_coverage(coverage_path):
+    input_xml = ET.ElementTree(file=coverage_path)
+    for class_ in input_xml.findall(".//class"):
+        filename = class_.get("filename")
+        filename = re.sub("_sync", "_async", filename)
+        class_.set("filename", filename)
+    input_xml.write(coverage_path, xml_declaration=True)
 
 
 def tests_impl(session, extras="socks,secure,brotli"):
@@ -28,7 +40,7 @@ def tests_impl(session, extras="socks,secure,brotli"):
         env={"PYTHONWARNINGS": "always::DeprecationWarning"}
     )
     session.run("coverage", "xml")
-    session.run("python", "cleancov.py", "coverage.xml")
+    _clean_coverage("coverage.xml")
 
 
 @nox.session(python=["2.7", "3.5", "3.6", "3.7", "3.8", "pypy"])

@@ -78,20 +78,13 @@ class TestConnectionPoolTimeouts(SocketDummyServerTestCase):
     def test_timeout(self):
         # Requests should time out when expected
         block_event = Event()
-        ready_event = self.start_basic_handler(block_send=block_event, num=6)
+        ready_event = self.start_basic_handler(block_send=block_event, num=3)
 
         # Pool-global timeout
-        timeout = Timeout(read=SHORT_TIMEOUT)
+        short_timeout = Timeout(read=SHORT_TIMEOUT)
         with HTTPConnectionPool(
-            self.host, self.port, timeout=timeout, retries=False
+            self.host, self.port, timeout=short_timeout, retries=False
         ) as pool:
-            wait_for_socket(ready_event)
-            conn = pool._get_conn()
-            with pytest.raises(ReadTimeoutError):
-                pool._make_request(conn, "GET", "/")
-            pool._put_conn(conn)
-            block_event.set()  # Release request
-
             wait_for_socket(ready_event)
             block_event.clear()
             with pytest.raises(ReadTimeoutError):
@@ -100,42 +93,22 @@ class TestConnectionPoolTimeouts(SocketDummyServerTestCase):
 
         # Request-specific timeouts should raise errors
         with HTTPConnectionPool(
-            self.host, self.port, timeout=LONG_TIMEOUT, retries=False
+            self.host, self.port, timeout=short_timeout, retries=False
         ) as pool:
-            conn = pool._get_conn()
             wait_for_socket(ready_event)
             now = time.time()
             with pytest.raises(ReadTimeoutError):
-                pool._make_request(conn, "GET", "/", timeout=timeout)
-            delta = time.time() - now
-            block_event.set()  # Release request
-
-            message = "timeout was pool-level LONG_TIMEOUT rather than request-level SHORT_TIMEOUT"
-            assert delta < LONG_TIMEOUT, message
-            pool._put_conn(conn)
-
-            wait_for_socket(ready_event)
-            now = time.time()
-            with pytest.raises(ReadTimeoutError):
-                pool.request("GET", "/", timeout=timeout)
+                pool.request("GET", "/", timeout=LONG_TIMEOUT)
             delta = time.time() - now
 
-            message = "timeout was pool-level LONG_TIMEOUT rather than request-level SHORT_TIMEOUT"
-            assert delta < LONG_TIMEOUT, message
+            message = "timeout was pool-level SHORT_TIMEOUT rather than request-level LONG_TIMEOUT"
+            assert delta >= LONG_TIMEOUT, message
             block_event.set()  # Release request
 
-            # Timeout int/float passed directly to request and _make_request should
-            # raise a request timeout
+            # Timeout passed directly to request should raise a request timeout
             wait_for_socket(ready_event)
             with pytest.raises(ReadTimeoutError):
                 pool.request("GET", "/", timeout=SHORT_TIMEOUT)
-            block_event.set()  # Release request
-
-            wait_for_socket(ready_event)
-            conn = pool._new_conn()
-            # FIXME: This assert flakes sometimes. Not sure why.
-            with pytest.raises(ReadTimeoutError):
-                pool._make_request(conn, "GET", "/", timeout=SHORT_TIMEOUT)
             block_event.set()  # Release request
 
     def test_connect_timeout(self):
