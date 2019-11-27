@@ -3,6 +3,7 @@ import json
 import logging
 import ssl
 import sys
+import shutil
 import warnings
 
 import mock
@@ -10,14 +11,15 @@ import pytest
 
 from dummyserver.testcase import HTTPSDummyServerTestCase, IPV6HTTPSDummyServerTestCase
 from dummyserver.server import (
+    CLIENT_CERT,
+    CLIENT_INTERMEDIATE_PEM,
+    CLIENT_NO_INTERMEDIATE_PEM,
+    CLIENT_INTERMEDIATE_KEY,
     DEFAULT_CA,
     DEFAULT_CA_BAD,
     DEFAULT_CERTS,
-    DEFAULT_CLIENT_CERTS,
-    DEFAULT_CLIENT_NO_INTERMEDIATE_CERTS,
     NO_SAN_CERTS,
     NO_SAN_CA,
-    DEFAULT_CA_DIR,
     IPV6_ADDR_CERTS,
     IPV6_ADDR_CA,
     HAS_IPV6,
@@ -104,32 +106,36 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             r = pool.request("GET", "/")
             assert r.status == 200, r.data
 
-    def test_client_intermediate(self):
-        client_cert, client_key = (
-            DEFAULT_CLIENT_CERTS["certfile"],
-            DEFAULT_CLIENT_CERTS["keyfile"],
-        )
+    def test_client_intermediate(self, certs_dir):
+        """Check that certificate chains work well with client certs
+
+        We generate an intermediate CA from the root CA, and issue a client certificate
+        from that intermediate CA. Since the server only knows about the root CA, we
+        need to send it the certificate *and* the intermediate CA, so that it can check
+        the whole chain.
+        """
         with HTTPSConnectionPool(
             self.host,
             self.port,
-            key_file=client_key,
-            cert_file=client_cert,
+            key_file=str(certs_dir / CLIENT_INTERMEDIATE_KEY),
+            cert_file=str(certs_dir / CLIENT_INTERMEDIATE_PEM),
             ca_certs=DEFAULT_CA,
         ) as https_pool:
             r = https_pool.request("GET", "/certificate")
             subject = json.loads(r.data.decode("utf-8"))
-            assert subject["organizationalUnitName"].startswith("Testing server cert")
+            assert subject["organizationalUnitName"].startswith("Testing cert")
 
-    def test_client_no_intermediate(self):
-        client_cert, client_key = (
-            DEFAULT_CLIENT_NO_INTERMEDIATE_CERTS["certfile"],
-            DEFAULT_CLIENT_NO_INTERMEDIATE_CERTS["keyfile"],
-        )
+    def test_client_no_intermediate(self, certs_dir):
+        """Check that missing links in certificate chains indeed break
+
+        The only difference with test_client_intermediate is that we don't send the
+        intermediate CA to the server, only the client cert.
+        """
         with HTTPSConnectionPool(
             self.host,
             self.port,
-            cert_file=client_cert,
-            key_file=client_key,
+            cert_file=str(certs_dir / CLIENT_NO_INTERMEDIATE_PEM),
+            key_file=str(certs_dir / CLIENT_INTERMEDIATE_KEY),
             ca_certs=DEFAULT_CA,
         ) as https_pool:
             try:
@@ -152,21 +158,18 @@ class TestHTTPS(HTTPSDummyServerTestCase):
                     # Python 3.7.4+
                     or "WSAECONNRESET" in str(e)  # Windows
                     or "EPIPE" in str(e)  # macOS
+                    or "ECONNRESET" in str(e)  # OpenSSL
                 ):
                     raise
 
     @requires_ssl_context_keyfile_password
     def test_client_key_password(self):
-        client_cert, client_key = (
-            DEFAULT_CLIENT_CERTS["certfile"],
-            PASSWORD_CLIENT_KEYFILE,
-        )
         with HTTPSConnectionPool(
             self.host,
             self.port,
             ca_certs=DEFAULT_CA,
-            key_file=client_key,
-            cert_file=client_cert,
+            key_file=PASSWORD_CLIENT_KEYFILE,
+            cert_file=CLIENT_CERT,
             key_password="letmein",
         ) as https_pool:
             r = https_pool.request("GET", "/certificate")
@@ -175,16 +178,12 @@ class TestHTTPS(HTTPSDummyServerTestCase):
 
     @requires_ssl_context_keyfile_password
     def test_client_encrypted_key_requires_password(self):
-        client_cert, client_key = (
-            DEFAULT_CLIENT_CERTS["certfile"],
-            PASSWORD_CLIENT_KEYFILE,
-        )
         with pytest.raises(SSLError) as e:
             HTTPSConnectionPool(
                 self.host,
                 self.port,
-                key_file=client_key,
-                cert_file=client_cert,
+                key_file=PASSWORD_CLIENT_KEYFILE,
+                cert_file=CLIENT_CERT,
                 key_password=None,
             )
         assert "password is required" in str(e.value)
@@ -268,9 +267,14 @@ class TestHTTPS(HTTPSDummyServerTestCase):
     @onlyPy279OrNewer
     @notSecureTransport  # SecureTransport does not support cert directories
     @notOpenSSL098  # OpenSSL 0.9.8 does not support cert directories
-    def test_ca_dir_verified(self):
+    def test_ca_dir_verified(self, tmpdir):
+        # OpenSSL looks up certificates by the hash for their name, see c_rehash
+        # TODO infer the bytes using `cryptography.x509.Name.public_bytes`.
+        # https://github.com/pyca/cryptography/pull/3236
+        shutil.copyfile(DEFAULT_CA, str(tmpdir / "b6b9ccf9.0"))
+
         with HTTPSConnectionPool(
-            self.host, self.port, cert_reqs="CERT_REQUIRED", ca_cert_dir=DEFAULT_CA_DIR
+            self.host, self.port, cert_reqs="CERT_REQUIRED", ca_cert_dir=str(tmpdir)
         ) as https_pool:
             with mock.patch("warnings.warn") as warn:
                 r = https_pool.request("GET", "/")

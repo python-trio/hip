@@ -8,7 +8,7 @@ from urllib3 import connection_from_url
 from urllib3.exceptions import ClosedPoolError, LocationValueError
 from urllib3.util import retry, timeout, ssl_
 
-from dummyserver.server import DEFAULT_CA, DEFAULT_CERTS, DEFAULT_CA_DIR
+from dummyserver.server import CERTS_PATH, DEFAULT_CA, DEFAULT_CERTS
 
 
 class TestPoolManager(object):
@@ -140,7 +140,7 @@ class TestPoolManager(object):
             ("cert_file", DEFAULT_CERTS["certfile"]),
             ("cert_reqs", "CERT_REQUIRED"),
             ("ca_certs", DEFAULT_CA),
-            ("ca_cert_dir", DEFAULT_CA_DIR),
+            ("ca_cert_dir", CERTS_PATH),
             ("ssl_version", "SSLv23"),
             ("ssl_context", ssl_.create_urllib3_context()),
         ]
@@ -181,7 +181,7 @@ class TestPoolManager(object):
             ("cert_file", DEFAULT_CERTS["certfile"]),
             ("cert_reqs", "CERT_REQUIRED"),
             ("ca_certs", DEFAULT_CA),
-            ("ca_cert_dir", DEFAULT_CA_DIR),
+            ("ca_cert_dir", CERTS_PATH),
             ("ssl_version", "SSLv23"),
             ("ssl_context", ssl_.create_urllib3_context()),
         ]
