@@ -45,8 +45,3 @@ else
         python3 -m pip install nox
     fi
 fi
-
-if [[ "${NOX_SESSION}" == "app_engine" ]]; then
-    python -m pip install gcp-devrel-py-tools
-    gcp-devrel-py-tools download-appengine-sdk "$(dirname ${GAE_SDK_PATH})"
-fi
