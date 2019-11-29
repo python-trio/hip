@@ -2,7 +2,7 @@ import asyncio
 import curio
 import trio
 
-from urllib3._backends._loader import normalize_backend
+from hip._backends._loader import normalize_backend
 
 
 def test_sniff_backends():

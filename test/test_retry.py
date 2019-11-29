@@ -3,11 +3,11 @@ import mock
 import pytest
 import time
 
-from urllib3.response import HTTPResponse
-from urllib3.packages import six
-from urllib3.packages.six.moves import xrange
-from urllib3.util.retry import Retry, RequestHistory
-from urllib3.exceptions import (
+from hip.response import HTTPResponse
+from hip.packages import six
+from hip.packages.six.moves import xrange
+from hip.util.retry import Retry, RequestHistory
+from hip.exceptions import (
     ConnectTimeoutError,
     InvalidHeader,
     MaxRetryError,

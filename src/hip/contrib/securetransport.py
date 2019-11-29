@@ -1,7 +1,7 @@
 """
-SecureTranport support for urllib3 via ctypes.
+SecureTranport support for hip via ctypes.
 
-This makes platform-native TLS available to urllib3 users on macOS without the
+This makes platform-native TLS available to hip users on macOS without the
 use of a compiler. This is an important feature because the Python Package
 Index is moving to become a TLSv1.2-or-higher server, and the default OpenSSL
 that ships with macOS is not capable of doing TLSv1.2. The only way to resolve
@@ -19,14 +19,14 @@ contrib module. So...here we are.
 
 To use this module, simply import and inject it::
 
-    import urllib3.contrib.securetransport
-    urllib3.contrib.securetransport.inject_into_hip()
+    import hp.contrib.securetransport
+    hip.contrib.securetransport.inject_into_hip()
 
 Happy TLSing!
 
 This code is a bastardised version of the code found in Will Bond's oscrypto
 library. An enormous debt is owed to him for blazing this trail for us. For
-that reason, this code should be considered to be covered both by urllib3's
+that reason, this code should be considered to be covered both by hip's
 license and by oscrypto's:
 
     Copyright (c) 2015-2016 Will Bond <will@wbond.net>
@@ -179,7 +179,7 @@ if hasattr(ssl, "PROTOCOL_TLSv1_2"):
 
 def inject_into_hip():
     """
-    Monkey-patch urllib3 with SecureTransport-backed SSL-support.
+    Monkey-patch hip with SecureTransport-backed SSL-support.
     """
     util.SSLContext = SecureTransportContext
     util.ssl_.SSLContext = SecureTransportContext
@@ -649,7 +649,7 @@ class WrappedSocket(object):
         # This is gross. Really gross. It's going to be a few hundred LoC extra
         # just to repeat something that SecureTransport can *already do*. So my
         # operating assumption at this time is that what we want to do is
-        # instead to just flag to urllib3 that it shouldn't do its own hostname
+        # instead to just flag to hip that it shouldn't do its own hostname
         # validation when using SecureTransport.
         if not binary_form:
             raise ValueError("SecureTransport only supports dumping binary certs")
@@ -800,7 +800,7 @@ class SecureTransportContext(object):
         #
         # This means that, if we had previously had load_verify_locations
         # called, this does not undo that. We need to do that because it turns
-        # out that the rest of the urllib3 code will attempt to load the
+        # out that the rest of the hip code will attempt to load the
         # default verify paths if it hasn't been told about any paths, even if
         # the context itself was sometime earlier. We resolve that by just
         # ignoring it.

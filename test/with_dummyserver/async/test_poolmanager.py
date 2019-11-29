@@ -1,5 +1,5 @@
 from dummyserver.testcase import HTTPDummyServerTestCase
-from urllib3 import AsyncPoolManager
+from hip import AsyncPoolManager
 
 
 class TestPoolManager(HTTPDummyServerTestCase):

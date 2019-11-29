@@ -18,25 +18,25 @@ You can install them with the following command:
     pip install pyopenssl cryptography idna
 
 To activate certificate checking, call
-:func:`~urllib3.contrib.pyopenssl.inject_into_hip` from your Python code
+:func:`~hip.contrib.pyopenssl.inject_into_hip` from your Python code
 before you begin making HTTP requests. This can be done in a ``sitecustomize``
-module, or at any other time before your application begins using ``urllib3``,
+module, or at any other time before your application begins using ``hip``,
 like this::
 
     try:
-        import urllib3.contrib.pyopenssl
-        urllib3.contrib.pyopenssl.inject_into_hip()
+        import hip.contrib.pyopenssl
+        hip.contrib.pyopenssl.inject_into_hip()
     except ImportError:
         pass
 
-Now you can use :mod:`urllib3` as you normally would, and it will support SNI
+Now you can use :mod:`hip` as you normally would, and it will support SNI
 when the required modules are installed.
 
 Activating this module also has the positive side effect of disabling SSL/TLS
 compression in Python 2 (see `CRIME attack`_).
 
 If you want to configure the default list of supported cipher suites, you can
-set the ``urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST`` variable.
+set the ``hip.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST`` variable.
 
 .. _sni: https://en.wikipedia.org/wiki/Server_Name_Indication
 .. _crime attack: https://en.wikipedia.org/wiki/CRIME_(security_exploit)
@@ -78,7 +78,7 @@ __all__ = ["inject_into_hip", "extract_from_hip"]
 # SNI always works.
 HAS_SNI = True
 
-# Map from urllib3 to PyOpenSSL compatible parameter-values.
+# Map from hip to PyOpenSSL compatible parameter-values.
 _openssl_versions = {
     util.PROTOCOL_TLS: OpenSSL.SSL.SSLv23_METHOD,
     ssl.PROTOCOL_TLSv1: OpenSSL.SSL.TLSv1_METHOD,
@@ -115,7 +115,7 @@ log = logging.getLogger(__name__)
 
 
 def inject_into_hip():
-    "Monkey-patch urllib3 with PyOpenSSL-backed SSL-support."
+    "Monkey-patch hip with PyOpenSSL-backed SSL-support."
 
     _validate_dependencies_met()
 
@@ -244,7 +244,7 @@ def get_subj_alt_name(peer_cert):
         # no SAN field is present.
         log.warning(
             "A problem was encountered with the certificate that prevented "
-            "urllib3 from finding the SubjectAlternativeName field. This can "
+            "hip from finding the SubjectAlternativeName field. This can "
             "affect certificate validation. The error was %s",
             e,
         )

@@ -6,7 +6,7 @@ import ssl
 import pytest
 
 try:
-    from urllib3.contrib.securetransport import WrappedSocket
+    from hip.contrib.securetransport import WrappedSocket
 except ImportError:
     pass
 
@@ -15,7 +15,7 @@ pytestmark = pytest.mark.skip("SecureTransport currently not supported on v2!")
 
 def setup_module():
     try:
-        from urllib3.contrib.securetransport import inject_into_hip
+        from hip.contrib.securetransport import inject_into_hip
 
         inject_into_hip()
     except ImportError as e:
@@ -24,7 +24,7 @@ def setup_module():
 
 def teardown_module():
     try:
-        from urllib3.contrib.securetransport import extract_from_hip
+        from hip.contrib.securetransport import extract_from_hip
 
         extract_from_hip()
     except ImportError:

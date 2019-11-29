@@ -16,7 +16,7 @@ import warnings
 import ssl
 from datetime import datetime
 
-from urllib3.exceptions import HTTPWarning
+from hip.exceptions import HTTPWarning
 
 import tornado.httpserver
 import tornado.ioloop

@@ -11,7 +11,7 @@ import time
 import urllib
 
 sys.path.append("../")
-import urllib3  # noqa: E402
+import hip  # noqa: E402
 
 
 # URLs to download. Doesn't matter as long as they're from the same host, so we
@@ -46,7 +46,7 @@ def urllib_get(url_list):
 
 def pool_get(url_list):
     assert url_list
-    pool = urllib3.PoolManager()
+    pool = hip.PoolManager()
     for url in url_list:
         now = time.time()
         pool.request("GET", url, assert_same_host=False)

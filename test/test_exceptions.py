@@ -2,7 +2,7 @@ import pickle
 
 import pytest
 
-from urllib3.exceptions import (
+from hip.exceptions import (
     HTTPError,
     MaxRetryError,
     LocationParseError,
@@ -12,7 +12,7 @@ from urllib3.exceptions import (
     ConnectTimeoutError,
     HeaderParsingError,
 )
-from urllib3.connectionpool import HTTPConnectionPool
+from hip.connectionpool import HTTPConnectionPool
 
 
 class TestPickle(object):

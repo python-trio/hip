@@ -178,7 +178,7 @@ class TwistedSocket:
         await self._protocol.start_tls(server_hostname, ssl_context)
 
     def getpeercert(self, binary_form=False):
-        # Cribbed from urllib3.contrib.pyopenssl.WrappedSocket.getpeercert
+        # Cribbed from hip .contrib.pyopenssl.WrappedSocket.getpeercert
         x509 = self._protocol.transport.getPeerCertificate()
         if not x509:
             return x509

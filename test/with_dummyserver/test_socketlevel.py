@@ -1,8 +1,8 @@
 # TODO: Break this module up into pieces. Maybe group by functionality tested
 # rather than the socket level-ness of it.
-from urllib3 import HTTPConnectionPool, HTTPSConnectionPool
-from urllib3.poolmanager import proxy_from_url
-from urllib3.exceptions import (
+from hip import HTTPConnectionPool, HTTPSConnectionPool
+from hip.poolmanager import proxy_from_url
+from hip.exceptions import (
     MaxRetryError,
     ProxyError,
     ReadTimeoutError,
@@ -11,11 +11,11 @@ from urllib3.exceptions import (
     BadVersionError,
     FailedTunnelError,
 )
-from urllib3.util.ssl_ import HAS_SNI
-from urllib3.util import ssl_
-from urllib3.util.timeout import Timeout
-from urllib3.util.retry import Retry
-from urllib3._collections import HTTPHeaderDict
+from hip.util.ssl_ import HAS_SNI
+from hip.util import ssl_
+from hip.util.timeout import Timeout
+from hip.util.retry import Retry
+from hip._collections import HTTPHeaderDict
 
 from dummyserver.testcase import SocketDummyServerTestCase, consume_socket
 from dummyserver.server import (
@@ -1416,7 +1416,7 @@ class TestSSL(SocketDummyServerTestCase):
         context.load_default_certs = mock.Mock()
         context.options = 0
 
-        with mock.patch("urllib3.util.ssl_.SSLContext", lambda *_, **__: context):
+        with mock.patch("hip.util.ssl_.SSLContext", lambda *_, **__: context):
             self._start_server(socket_handler)
             with HTTPSConnectionPool(self.host, self.port) as pool:
                 with pytest.raises(MaxRetryError):
@@ -1453,7 +1453,7 @@ class TestSSL(SocketDummyServerTestCase):
         context.load_default_certs = mock.Mock()
         context.options = 0
 
-        with mock.patch("urllib3.util.ssl_.SSLContext", lambda *_, **__: context):
+        with mock.patch("hip.util.ssl_.SSLContext", lambda *_, **__: context):
             for kwargs in [
                 {"ca_certs": "/a"},
                 {"ca_cert_dir": "/a"},

@@ -60,7 +60,7 @@ class ModuleStash(object):
 
 
 ssl_blocker = ImportBlocker("ssl", "_ssl")
-module_stash = ModuleStash("urllib3")
+module_stash = ModuleStash("hip")
 
 
 class TestWithoutSSL(object):
@@ -82,5 +82,5 @@ class TestImportWithoutSSL(TestWithoutSSL):
         with pytest.raises(ImportError):
             import ssl  # noqa: F401
 
-    def test_import_urllib3(self):
-        import urllib3  # noqa: F401
+    def test_import_hip(self):
+        import hip  # noqa: F401

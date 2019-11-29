@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 This module provides the base structure of the Request/Response objects that
-urllib3 passes around to manage its HTTP semantic layer.
+hip passes around to manage its HTTP semantic layer.
 
 These objects are the lowest common denominator: that is, they define the
-Request/Response functionality that is always supported by urllib3. This means
+Request/Response functionality that is always supported by hip. This means
 they do not include any extra function required for asynchrony: that
-functionality is handled elsewhere. Any part of urllib3 is required to be able
+functionality is handled elsewhere. Any part of hip is required to be able
 to work with one of these objects.
 """
 from ._collections import HTTPHeaderDict
@@ -26,7 +26,7 @@ class Request(object):
     and love: it has a method, a target (the path & query portions of a URI),
     some headers, and optionally a body.
 
-    All of urllib3 manipulates these Request objects, passing them around and
+    All of hip manipulates these Request objects, passing them around and
     changing them as necessary. The low-level layers know how to send these
     objects.
     """
@@ -79,9 +79,9 @@ class Request(object):
 
 class Response(object):
     """
-    The abstract low-level Response object that urllib3 works on. This is not
+    The abstract low-level Response object that hip works on. This is not
     the high-level helpful Response object that is exposed at the higher layers
-    of urllib3: it's just a simple object that just exposes the lowest-level
+    of hip: it's just a simple object that just exposes the lowest-level
     HTTP semantics to allow processing by the higher levels.
     """
 

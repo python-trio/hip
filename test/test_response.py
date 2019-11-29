@@ -8,10 +8,10 @@ from io import BytesIO, BufferedReader, TextIOWrapper
 import pytest
 import six
 
-from urllib3.base import Response
-from urllib3.response import HTTPResponse, brotli
-from urllib3.exceptions import DecodeError
-from urllib3.util.retry import Retry
+from hip.base import Response
+from hip.response import HTTPResponse, brotli
+from hip.exceptions import DecodeError
+from hip.util.retry import Retry
 
 from test import onlyBrotlipy
 
@@ -561,7 +561,7 @@ class TestResponse(object):
             next(stream)
 
     def test_mock_httpresponse_stream(self):
-        # Mock out a HTTP Request that does enough to make it through urllib3's
+        # Mock out a HTTP Request that does enough to make it through hip's
         # read() and close() calls, and also exhausts and underlying file
         # object.
         class MockHTTPRequest(object):

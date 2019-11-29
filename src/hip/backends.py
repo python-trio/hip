@@ -2,7 +2,7 @@ class Backend:
     """
     Specifies the desired backend and any arguments passed to its constructor.
 
-    Projects that use urllib3 can subclass this interface to expose it to users.
+    Projects that use hip can subclass this interface to expose it to users.
     """
 
     def __init__(self, name, **kwargs):

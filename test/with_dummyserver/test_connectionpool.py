@@ -7,8 +7,8 @@ import pytest
 
 from .. import TARPIT_HOST, VALID_SOURCE_ADDRESSES, INVALID_SOURCE_ADDRESSES
 from ..port_helpers import find_unused_port
-from urllib3 import encode_multipart_formdata, HTTPConnectionPool
-from urllib3.exceptions import (
+from hip import encode_multipart_formdata, HTTPConnectionPool
+from hip.exceptions import (
     ConnectTimeoutError,
     EmptyPoolError,
     DecodeError,
@@ -16,10 +16,10 @@ from urllib3.exceptions import (
     ReadTimeoutError,
     NewConnectionError,
 )
-from urllib3.packages.six import b, u
-from urllib3.packages.six.moves.urllib.parse import urlencode
-from urllib3.util.retry import Retry
-from urllib3.util.timeout import Timeout
+from hip.packages.six import b, u
+from hip.packages.six.moves.urllib.parse import urlencode
+from hip.util.retry import Retry
+from hip.util.timeout import Timeout
 
 from test import SHORT_TIMEOUT, LONG_TIMEOUT
 from dummyserver.testcase import HTTPDummyServerTestCase, SocketDummyServerTestCase
@@ -29,7 +29,7 @@ from threading import Event
 
 pytestmark = pytest.mark.flaky
 
-log = logging.getLogger("urllib3.connectionpool")
+log = logging.getLogger("hip.connectionpool")
 log.setLevel(logging.NOTSET)
 log.addHandler(logging.StreamHandler(sys.stdout))
 

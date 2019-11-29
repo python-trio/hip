@@ -151,10 +151,10 @@ except ImportError:
         def wrap_socket(self, socket, server_hostname=None, server_side=False):
             warnings.warn(
                 "A true SSLContext object is not available. This prevents "
-                "urllib3 from configuring SSL appropriately and may cause "
+                "hip from configuring SSL appropriately and may cause "
                 "certain SSL connections to fail. You can upgrade to a newer "
                 "version of Python to solve this. For more information, see "
-                "https://urllib3.readthedocs.io/en/latest/advanced-usage.html"
+                "https://hip.readthedocs.io/en/latest/advanced-usage.html"
                 "#ssl-warnings",
                 InsecurePlatformWarning,
             )
@@ -248,7 +248,7 @@ def create_ssl_context(ssl_version=None, cert_reqs=None, options=None, ciphers=N
 
     If you wish to enable SSLv3, you can do::
 
-        from urllib3.util import ssl_
+        from hip.util import ssl_
         context = ssl_.create_ssl_context()
         context.options &= ~ssl_.OP_NO_SSLv3
 
@@ -387,7 +387,7 @@ def ssl_wrap_socket(
     context = ssl_context
     if context is None:
         # Note: This branch of code and all the variables in it are no longer
-        # used by urllib3 itself. We should consider deprecating and removing
+        # used by hip itself. We should consider deprecating and removing
         # this code.
         context = create_ssl_context(ssl_version, cert_reqs, ciphers=ciphers)
 
@@ -435,7 +435,7 @@ def ssl_wrap_socket(
             "This may cause the server to present an incorrect TLS "
             "certificate, which can cause validation failures. You can upgrade to "
             "a newer version of Python to solve this. For more information, see "
-            "https://urllib3.readthedocs.io/en/latest/advanced-usage.html"
+            "https://hip.readthedocs.io/en/latest/advanced-usage.html"
             "#ssl-warnings",
             SNIMissingWarning,
         )

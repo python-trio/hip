@@ -14,9 +14,9 @@ from tornado import httputil
 from datetime import datetime
 from datetime import timedelta
 
-from urllib3.packages.six.moves.http_client import responses
-from urllib3.packages.six.moves.urllib.parse import urlsplit
-from urllib3.packages.six import binary_type, ensure_str
+from hip.packages.six.moves.http_client import responses
+from hip.packages.six.moves.urllib.parse import urlsplit
+from hip.packages.six import binary_type, ensure_str
 
 log = logging.getLogger(__name__)
 

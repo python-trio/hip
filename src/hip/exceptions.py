@@ -68,7 +68,7 @@ class MaxRetryError(RequestError):
     """Raised when the maximum number of retries is exceeded.
 
     :param pool: The connection pool
-    :type pool: :class:`~urllib3.connectionpool.HTTPConnectionPool`
+    :type pool: :class:`~hip.connectionpool.HTTPConnectionPool`
     :param string url: The requested Url
     :param exceptions.Exception reason: The underlying error
 
@@ -218,7 +218,7 @@ class HeaderParsingError(HTTPError):
 
 
 class UnrewindableBodyError(HTTPError):
-    "urllib3 encountered an error when trying to rewind a body"
+    "hip encountered an error when trying to rewind a body"
     pass
 
 
@@ -234,7 +234,7 @@ class FailedTunnelError(HTTPError):
 
 class InvalidBodyError(HTTPError):
     """
-    An attempt was made to send a request with a body object that urllib3 does
+    An attempt was made to send a request with a body object that hip does
     not support.
     """
 

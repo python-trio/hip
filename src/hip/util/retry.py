@@ -46,7 +46,7 @@ class Retry(object):
 
         response = http.request('GET', 'http://example.com/', retries=False)
 
-    Errors will be wrapped in :class:`~urllib3.exceptions.MaxRetryError` unless
+    Errors will be wrapped in :class:`~hip.exceptions.MaxRetryError` unless
     retries are disabled, in which case the causing exception will be raised.
 
     :param int total:
@@ -114,7 +114,7 @@ class Retry(object):
     :param float backoff_factor:
         A backoff factor to apply between attempts after the second try
         (most errors are resolved immediately by a second try without a
-        delay). urllib3 will sleep for::
+        delay). hip will sleep for::
 
             {backoff factor} * (2 ** ({number of total retries} - 1))
 
@@ -365,7 +365,7 @@ class Retry(object):
 
         :param response: A response object, or None, if the server did not
             return a response.
-        :type response: :class:`~urllib3.response.HTTPResponse`
+        :type response: :class:`~hip.response.HTTPResponse`
         :param Exception error: An error encountered during the request, or
             None if the response was received successfully.
 
