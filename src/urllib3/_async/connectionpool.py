@@ -455,6 +455,18 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
             self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
             raise
 
+        http_version = "HTTP/1.1"
+        log.debug(
+            '%s://%s:%s "%s %s %s" %s',
+            self.scheme,
+            self.host,
+            self.port,
+            method,
+            url,
+            http_version,
+            response.status_code,
+        )
+
         return response
 
     def _absolute_url(self, path):
