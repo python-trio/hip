@@ -15,9 +15,9 @@ pytestmark = pytest.mark.skip("SecureTransport currently not supported on v2!")
 
 def setup_module():
     try:
-        from urllib3.contrib.securetransport import inject_into_urllib3
+        from urllib3.contrib.securetransport import inject_into_hip
 
-        inject_into_urllib3()
+        inject_into_hip()
     except ImportError as e:
         pytest.skip("Could not import SecureTransport: %r" % e)
 

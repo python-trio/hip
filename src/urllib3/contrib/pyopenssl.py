@@ -18,14 +18,14 @@ You can install them with the following command:
     pip install pyopenssl cryptography idna
 
 To activate certificate checking, call
-:func:`~urllib3.contrib.pyopenssl.inject_into_urllib3` from your Python code
+:func:`~urllib3.contrib.pyopenssl.inject_into_hip` from your Python code
 before you begin making HTTP requests. This can be done in a ``sitecustomize``
 module, or at any other time before your application begins using ``urllib3``,
 like this::
 
     try:
         import urllib3.contrib.pyopenssl
-        urllib3.contrib.pyopenssl.inject_into_urllib3()
+        urllib3.contrib.pyopenssl.inject_into_hip()
     except ImportError:
         pass
 
@@ -73,7 +73,7 @@ import sys
 from .. import util
 
 
-__all__ = ["inject_into_urllib3", "extract_from_urllib3"]
+__all__ = ["inject_into_hip", "extract_from_urllib3"]
 
 # SNI always works.
 HAS_SNI = True
@@ -114,7 +114,7 @@ orig_util_SSLWantWriteError = util.SSLWantWriteError
 log = logging.getLogger(__name__)
 
 
-def inject_into_urllib3():
+def inject_into_hip():
     "Monkey-patch urllib3 with PyOpenSSL-backed SSL-support."
 
     _validate_dependencies_met()
@@ -132,7 +132,7 @@ def inject_into_urllib3():
 
 
 def extract_from_urllib3():
-    "Undo monkey-patching by :func:`inject_into_urllib3`."
+    "Undo monkey-patching by :func:`inject_into_hip`."
 
     util.SSLContext = orig_util_SSLContext
     util.ssl_.SSLContext = orig_util_SSLContext

@@ -20,7 +20,7 @@ contrib module. So...here we are.
 To use this module, simply import and inject it::
 
     import urllib3.contrib.securetransport
-    urllib3.contrib.securetransport.inject_into_urllib3()
+    urllib3.contrib.securetransport.inject_into_hip()
 
 Happy TLSing!
 
@@ -76,7 +76,7 @@ except ImportError:  # Platform-specific: Python 3
     _fileobject = None
     from ..packages.backports.makefile import backport_makefile
 
-__all__ = ["inject_into_urllib3", "extract_from_urllib3"]
+__all__ = ["inject_into_hip", "extract_from_urllib3"]
 
 # SNI always works
 HAS_SNI = True
@@ -177,7 +177,7 @@ if hasattr(ssl, "PROTOCOL_TLSv1_2"):
     )
 
 
-def inject_into_urllib3():
+def inject_into_hip():
     """
     Monkey-patch urllib3 with SecureTransport-backed SSL-support.
     """
@@ -191,7 +191,7 @@ def inject_into_urllib3():
 
 def extract_from_urllib3():
     """
-    Undo monkey-patching by :func:`inject_into_urllib3`.
+    Undo monkey-patching by :func:`inject_into_hip`.
     """
     util.SSLContext = orig_util_SSLContext
     util.ssl_.SSLContext = orig_util_SSLContext
