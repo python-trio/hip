@@ -134,8 +134,6 @@ def wait_for_socket(*args, **kwargs):
         wait_for_socket = poll_wait_for_socket
     elif hasattr(select, "select"):
         wait_for_socket = select_wait_for_socket
-    else:  # Platform-specific: Appengine.
-        wait_for_socket = null_wait_for_socket
     return wait_for_socket(*args, **kwargs)
 
 

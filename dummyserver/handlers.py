@@ -6,7 +6,6 @@ import gzip
 import json
 import logging
 import sys
-import time
 import zlib
 
 from io import BytesIO
@@ -213,14 +212,6 @@ class TestingApp(RequestHandler):
             [(ensure_str(k), ensure_str(v)) for k, v in request.params.items()]
         )
         return Response(repr(params))
-
-    def sleep(self, request):
-        "Sleep for a specified amount of ``seconds``"
-        # DO NOT USE THIS, IT'S DEPRECATED.
-        # FIXME: Delete this once appengine tests are fixed to not use this handler.
-        seconds = float(request.params.get("seconds", "1"))
-        time.sleep(seconds)
-        return Response()
 
     def echo(self, request):
         "Echo back the params"
