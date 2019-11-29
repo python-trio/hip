@@ -455,19 +455,6 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
             self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
             raise
 
-        # AppEngine doesn't have a version attr.
-        http_version = getattr(conn, "_http_vsn_str", "HTTP/?")
-        log.debug(
-            '%s://%s:%s "%s %s %s" %s',
-            self.scheme,
-            self.host,
-            self.port,
-            method,
-            url,
-            http_version,
-            response.status_code,
-        )
-
         return response
 
     def _absolute_url(self, path):

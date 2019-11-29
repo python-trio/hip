@@ -306,13 +306,6 @@ to the standard-library :mod:`ssl` module. You may experience
     `Stackoverflow thread <https://stackoverflow.com/questions/5128845/importerror-no-module-named-ssl>`_
     for more details.
 
-    If you are on Google App Engine, you must explicitly enable SSL
-    support in your ``app.yaml``::
-
-        libraries:
-        - name: ssl
-          version: latest
-
 Using timeouts
 --------------
 
