@@ -4,7 +4,7 @@ import pytest
 from mock import patch, Mock
 
 try:
-    from urllib3.contrib.pyopenssl import inject_into_hip, extract_from_urllib3
+    from urllib3.contrib.pyopenssl import inject_into_hip, extract_from_hip
 except ImportError:
     pass
 
@@ -20,9 +20,9 @@ def setup_module():
 
 def teardown_module():
     try:
-        from urllib3.contrib.pyopenssl import extract_from_urllib3
+        from urllib3.contrib.pyopenssl import extract_from_hip
 
-        extract_from_urllib3()
+        extract_from_hip()
     except ImportError:
         pass
 
@@ -45,7 +45,7 @@ class TestPyOpenSSLInjection(object):
             # `inject_into_hip` is not supposed to succeed.
             # If it does, this test should fail, but we need to
             # clean up so that subsequent tests are unaffected.
-            extract_from_urllib3()
+            extract_from_hip()
 
     def test_inject_validate_fail_pyopenssl(self):
         """
@@ -61,4 +61,4 @@ class TestPyOpenSSLInjection(object):
             # `inject_into_hip` is not supposed to succeed.
             # If it does, this test should fail, but we need to
             # clean up so that subsequent tests are unaffected.
-            extract_from_urllib3()
+            extract_from_hip()

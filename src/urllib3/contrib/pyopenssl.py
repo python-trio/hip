@@ -73,7 +73,7 @@ import sys
 from .. import util
 
 
-__all__ = ["inject_into_hip", "extract_from_urllib3"]
+__all__ = ["inject_into_hip", "extract_from_hip"]
 
 # SNI always works.
 HAS_SNI = True
@@ -131,7 +131,7 @@ def inject_into_hip():
     util.ssl_.SSLWantWriteError = OpenSSL.SSL.WantWriteError
 
 
-def extract_from_urllib3():
+def extract_from_hip():
     "Undo monkey-patching by :func:`inject_into_hip`."
 
     util.SSLContext = orig_util_SSLContext
