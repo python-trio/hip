@@ -689,14 +689,12 @@ class TestUtil(object):
 
         mock_context.load_cert_chain.assert_called_once_with("/path/to/certfile", None)
 
-    @patch("urllib3.util.ssl_.create_urllib3_context")
-    def test_ssl_wrap_socket_creates_new_context(self, create_urllib3_context):
+    @patch("urllib3.util.ssl_.create_ssl_context")
+    def test_ssl_wrap_socket_creates_new_context(self, create_ssl_context):
         socket = object()
         ssl_wrap_socket(sock=socket, cert_reqs="CERT_REQUIRED")
 
-        create_urllib3_context.assert_called_once_with(
-            None, "CERT_REQUIRED", ciphers=None
-        )
+        create_ssl_context.assert_called_once_with(None, "CERT_REQUIRED", ciphers=None)
 
     def test_ssl_wrap_socket_loads_verify_locations(self):
         socket = object()

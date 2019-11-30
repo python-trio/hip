@@ -35,7 +35,7 @@ from ..util.connection import is_connection_dropped
 from ..util.request import set_file_position
 from ..util.retry import Retry
 from ..util.ssl_ import (
-    create_urllib3_context,
+    create_ssl_context,
     merge_context_settings,
     resolve_ssl_version,
     resolve_cert_reqs,
@@ -97,7 +97,7 @@ def _build_context(
     collection of possible properties of that context.
     """
     if context is None:
-        context = create_urllib3_context(
+        context = create_ssl_context(
             ssl_version=resolve_ssl_version(ssl_version),
             cert_reqs=resolve_cert_reqs(cert_reqs),
         )

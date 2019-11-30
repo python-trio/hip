@@ -104,14 +104,14 @@ def test_sni_missing_warning_with_ip_addresses(
         ("ECDH+AESGCM:ECDH+CHACHA20", "ECDH+AESGCM:ECDH+CHACHA20"),
     ],
 )
-def test_create_urllib3_context_set_ciphers(monkeypatch, ciphers, expected_ciphers):
+def test_create_ssl_context_set_ciphers(monkeypatch, ciphers, expected_ciphers):
 
     context = mock.create_autospec(ssl_.SSLContext)
     context.set_ciphers = mock.Mock()
     context.options = 0
     monkeypatch.setattr(ssl_, "SSLContext", lambda *_, **__: context)
 
-    assert ssl_.create_urllib3_context(ciphers=ciphers) is context
+    assert ssl_.create_ssl_context(ciphers=ciphers) is context
 
     assert context.set_ciphers.call_count == 1
     assert context.set_ciphers.call_args == mock.call(expected_ciphers)
@@ -158,13 +158,13 @@ def test_wrap_socket_default_loads_default_certs(monkeypatch):
 @pytest.mark.parametrize(
     ["pha", "expected_pha"], [(None, None), (False, True), (True, True)]
 )
-def test_create_urllib3_context_pha(monkeypatch, pha, expected_pha):
+def test_create_ssl_context_pha(monkeypatch, pha, expected_pha):
     context = mock.create_autospec(ssl_.SSLContext)
     context.set_ciphers = mock.Mock()
     context.options = 0
     context.post_handshake_auth = pha
     monkeypatch.setattr(ssl_, "SSLContext", lambda *_, **__: context)
 
-    assert ssl_.create_urllib3_context() is context
+    assert ssl_.create_ssl_context() is context
 
     assert context.post_handshake_auth == expected_pha

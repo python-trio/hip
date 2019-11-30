@@ -214,7 +214,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
                     assert error == InsecurePlatformWarning
 
     def test_verified_with_context(self):
-        ctx = util.ssl_.create_urllib3_context(cert_reqs=ssl.CERT_REQUIRED)
+        ctx = util.ssl_.create_ssl_context(cert_reqs=ssl.CERT_REQUIRED)
         ctx.load_verify_locations(cafile=DEFAULT_CA)
         with HTTPSConnectionPool(self.host, self.port, ssl_context=ctx) as https_pool:
             with mock.patch("warnings.warn") as warn:
@@ -239,7 +239,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
                     assert error == InsecurePlatformWarning
 
     def test_context_combines_with_ca_certs(self):
-        ctx = util.ssl_.create_urllib3_context(cert_reqs=ssl.CERT_REQUIRED)
+        ctx = util.ssl_.create_ssl_context(cert_reqs=ssl.CERT_REQUIRED)
         with HTTPSConnectionPool(
             self.host, self.port, ca_certs=DEFAULT_CA, ssl_context=ctx
         ) as https_pool:

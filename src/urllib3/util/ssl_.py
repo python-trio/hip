@@ -237,9 +237,7 @@ def resolve_ssl_version(candidate):
     return candidate
 
 
-def create_urllib3_context(
-    ssl_version=None, cert_reqs=None, options=None, ciphers=None
-):
+def create_ssl_context(ssl_version=None, cert_reqs=None, options=None, ciphers=None):
     """All arguments have the same meaning as ``ssl_wrap_socket``.
 
     By default, this function does a lot of the same work that
@@ -251,7 +249,7 @@ def create_urllib3_context(
     If you wish to enable SSLv3, you can do::
 
         from urllib3.util import ssl_
-        context = ssl_.create_urllib3_context()
+        context = ssl_.create_ssl_context()
         context.options &= ~ssl_.OP_NO_SSLv3
 
     You can do the same to enable compression (substituting ``COMPRESSION``
@@ -376,7 +374,7 @@ def ssl_wrap_socket(
         When SNI is supported, the expected hostname of the certificate
     :param ssl_context:
         A pre-made :class:`SSLContext` object. If none is provided, one will
-        be created using :func:`create_urllib3_context`.
+        be created using :func:`create_ssl_context`.
     :param ciphers:
         A string of ciphers we wish the client to support.
     :param ca_cert_dir:
@@ -391,7 +389,7 @@ def ssl_wrap_socket(
         # Note: This branch of code and all the variables in it are no longer
         # used by urllib3 itself. We should consider deprecating and removing
         # this code.
-        context = create_urllib3_context(ssl_version, cert_reqs, ciphers=ciphers)
+        context = create_ssl_context(ssl_version, cert_reqs, ciphers=ciphers)
 
     if ca_certs or ca_cert_dir:
         try:

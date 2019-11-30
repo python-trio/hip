@@ -142,7 +142,7 @@ class TestPoolManager(object):
             ("ca_certs", DEFAULT_CA),
             ("ca_cert_dir", CERTS_PATH),
             ("ssl_version", "SSLv23"),
-            ("ssl_context", ssl_.create_urllib3_context()),
+            ("ssl_context", ssl_.create_ssl_context()),
         ]
         p = PoolManager()
         conn_pools = [
@@ -183,7 +183,7 @@ class TestPoolManager(object):
             ("ca_certs", DEFAULT_CA),
             ("ca_cert_dir", CERTS_PATH),
             ("ssl_version", "SSLv23"),
-            ("ssl_context", ssl_.create_urllib3_context()),
+            ("ssl_context", ssl_.create_ssl_context()),
         ]
         p = PoolManager()
         conns = [p.connection_from_host("example.com", 443, scheme="https")]
