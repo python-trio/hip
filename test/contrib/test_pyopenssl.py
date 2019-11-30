@@ -5,8 +5,7 @@ import mock
 import pytest
 
 pytestmark = pytest.mark.skip(
-    "inject_into_urllib3/extract_from_urllib3 appear to break the standard "
-    "library SSL tests"
+    "inject_into_hip/extract_from_hip appear to break the standard library SSL tests"
 )
 
 try:
@@ -19,18 +18,18 @@ except ImportError:
 
 def setup_module():
     try:
-        from urllib3.contrib.pyopenssl import inject_into_urllib3
+        from urllib3.contrib.pyopenssl import inject_into_hip
 
-        inject_into_urllib3()
+        inject_into_hip()
     except ImportError as e:
         pytest.skip("Could not import PyOpenSSL: %r" % e)
 
 
 def teardown_module():
     try:
-        from urllib3.contrib.pyopenssl import extract_from_urllib3
+        from urllib3.contrib.pyopenssl import extract_from_hip
 
-        extract_from_urllib3()
+        extract_from_hip()
     except ImportError:
         pass
 
