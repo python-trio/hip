@@ -16,10 +16,6 @@ print("--- urllib3 using Trio ---")
 import trio
 trio.run(main)
 
-print("\n--- urllib3 using AnyIO ---")
-import anyio
-anyio.run(main)
-
 print("\n--- urllib3 using asyncio (via AnyIO) ---")
 import asyncio
 loop = asyncio.get_event_loop()
