@@ -17,7 +17,7 @@ script:
 
 cache:
   directories:
-  - ${HOME}/.cache
+    - ${HOME}/.cache
 
 notifications:
   email: false
@@ -26,7 +26,7 @@ env:
   global:
     - PYTHONWARNINGS=always::DeprecationWarning
 
-    - PYPI_USERNAME=urllib3
+    - PYPI_USERNAME=hip
     # PYPI_PASSWORD is set in Travis control panel.
 
 matrix:
@@ -72,23 +72,6 @@ matrix:
       os: osx
       env: NOX_SESSION=test-3.7
 
-    # Downstream integration tests.
-    # - python: 2.7
-    #   env: DOWNSTREAM=requests
-    #   stage: integration
-
-    # - python: 3.7
-    #   env: DOWNSTREAM=requests
-    #   stage: integration
-
-    # - python: 2.7
-    #   env: DOWNSTREAM=botocore
-    #   stage: integration
-
-    # - python: 3.7
-    #   env: DOWNSTREAM=botocore
-    #   stage: integration
-
     - python: 3.7
       stage: deploy
       script:
@@ -113,4 +96,4 @@ stages:
 
   # Deploy on any tags
   - name: deploy
-    if: tag IS present AND tag =~ /^(\d+\.\d+(?:.\d+)?)$/ AND repo = urllib3/urllib3
+    if: tag IS present AND tag =~ /^(\d+\.\d+(?:.\d+)?)$/ AND repo = hip/hip
