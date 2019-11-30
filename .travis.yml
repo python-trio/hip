@@ -26,6 +26,9 @@ env:
   global:
     - PYTHONWARNINGS=always::DeprecationWarning
 
+    - PYPI_USERNAME=hip
+    # PYPI_PASSWORD is set in Travis control panel.
+
 matrix:
   include:
     # Lint & documentation.
@@ -69,6 +72,11 @@ matrix:
       os: osx
       env: NOX_SESSION=test-3.7
 
+    - python: 3.7
+      stage: deploy
+      script:
+        - ./_travis/deploy.sh
+
   allow_failures:
     # MacPython 3.5 only supports TLS 1.1 by default, which fails whenever
     # easy_install fetchs packages, which is required by Twisted. Giving up on
@@ -85,3 +93,7 @@ stages:
   # Run integration tests for release candidates
   - name: integration
     if: type = pull_request AND head_branch =~ ^release-[\d.]+$ AND tag IS blank
+
+  # Deploy on any tags
+  - name: deploy
+    if: tag IS present AND tag =~ /^(\d+\.\d+(?:.\d+)?)$/ AND repo = hip/hip
