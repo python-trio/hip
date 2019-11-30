@@ -55,7 +55,10 @@ def normalize_backend(backend, async_mode):
         else:
             import sniffio
 
-            backend = Backend(name=sniffio.current_async_library())
+            async_library = sniffio.current_async_library()
+            if async_library in ("asyncio", "curio"):
+                async_library = "anyio"
+            backend = Backend(name=async_library)
     elif not isinstance(backend, Backend):
         backend = Backend(name=backend)
 

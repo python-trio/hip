@@ -5,7 +5,7 @@ from urllib3.backends import Backend
 
 URL = "http://httpbin.org/uuid"
 
-async def main(backend):
+async def main(backend=None):
     with urllib3.AsyncPoolManager(backend=backend) as http:
         print("URL:", URL)
         r = await http.request("GET", URL, preload_content=False)
@@ -14,11 +14,21 @@ async def main(backend):
 
 print("--- urllib3 using Trio ---")
 import trio
-trio.run(main, "trio")
+trio.run(main)
 
 print("\n--- urllib3 using AnyIO ---")
 import anyio
-anyio.run(main, "anyio")
+anyio.run(main)
+
+print("\n--- urllib3 using asyncio (via AnyIO) ---")
+import asyncio
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
+loop.close()
+
+print("\n--- urllib3 using curio (via AnyIO) ---")
+import curio
+curio.run(main)
 
 print("\n--- urllib3 using Twisted ---")
 from twisted.internet.task import react
