@@ -43,7 +43,7 @@ MOCK_MODULES = (
 sys.modules.update((mod_name, MockModule()) for mod_name in MOCK_MODULES)
 
 
-import urllib3
+import hip
 
 
 # -- General configuration -----------------------------------------------------
@@ -84,7 +84,7 @@ copyright = u'{year}, Andrey Petrov'.format(year=date.today().year)
 # built documents.
 #
 # The short X.Y version.
-version = urllib3.__version__
+version = hip.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
 

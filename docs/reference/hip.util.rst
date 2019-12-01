@@ -4,18 +4,18 @@ urllib3.util package
 Useful methods for working with :mod:`httplib`, completely decoupled from
 code specific to **urllib3**.
 
-At the very core, just like its predecessors, :mod:`urllib3` is built on top of
+At the very core, just like its predecessors, :mod:`hip` is built on top of
 :mod:`httplib` -- the lowest level HTTP library included in the Python
 standard library.
 
-To aid the limited functionality of the :mod:`httplib` module, :mod:`urllib3`
+To aid the limited functionality of the :mod:`httplib` module, :mod:`hip`
 provides various helper methods which are used with the higher level components
 but can also be used independently.
 
 urllib3.util.connection module
 ------------------------------
 
-.. automodule:: urllib3.util.connection
+.. automodule:: hip.util.connection
     :members:
     :undoc-members:
     :show-inheritance:
@@ -23,7 +23,7 @@ urllib3.util.connection module
 urllib3.util.request module
 ---------------------------
 
-.. automodule:: urllib3.util.request
+.. automodule:: hip.util.request
     :members:
     :undoc-members:
     :show-inheritance:
@@ -31,7 +31,7 @@ urllib3.util.request module
 urllib3.util.retry module
 -------------------------
 
-.. automodule:: urllib3.util.retry
+.. automodule:: hip.util.retry
     :members:
     :undoc-members:
     :show-inheritance:
@@ -39,7 +39,7 @@ urllib3.util.retry module
 urllib3.util.timeout module
 ---------------------------
 
-.. automodule:: urllib3.util.timeout
+.. automodule:: hip.util.timeout
     :members:
     :undoc-members:
     :show-inheritance:
@@ -47,7 +47,7 @@ urllib3.util.timeout module
 urllib3.util.url module
 -----------------------
 
-.. automodule:: urllib3.util.url
+.. automodule:: hip.util.url
     :members:
     :undoc-members:
     :show-inheritance:
@@ -56,7 +56,7 @@ urllib3.util.url module
 Module contents
 ---------------
 
-.. automodule:: urllib3.util
+.. automodule:: hip.util
     :members:
     :undoc-members:
     :show-inheritance:

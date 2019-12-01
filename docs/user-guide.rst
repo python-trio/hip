@@ -1,7 +1,7 @@
 User Guide
 ==========
 
-.. currentmodule:: urllib3
+.. currentmodule:: hip
 
 Making requests
 ---------------
@@ -281,7 +281,7 @@ If you want to install the packages manually, you will need ``pyOpenSSL``,
     <https://cryptography.io/en/latest/installation/#building-cryptography-on-linux>`_
     for the list of packages required.
 
-Once installed, you can tell urllib3 to use pyOpenSSL by using :mod:`urllib3.contrib.pyopenssl`::
+Once installed, you can tell urllib3 to use pyOpenSSL by using :mod:`hip.contrib.pyopenssl`::
 
     >>> import urllib3.contrib.pyopenssl
     >>> urllib3.contrib.pyopenssl.inject_into_urllib3()
@@ -296,7 +296,7 @@ certificates when performing requests::
     ...     ca_certs=certifi.where())
 
 If you do not wish to use pyOpenSSL, you can simply omit the call to
-:func:`urllib3.contrib.pyopenssl.inject_into_urllib3`. urllib3 will fall back
+:func:`hip.contrib.pyopenssl.inject_into_urllib3`. urllib3 will fall back
 to the standard-library :mod:`ssl` module. You may experience
 :ref:`several warnings <ssl_warnings>` when doing this.
 

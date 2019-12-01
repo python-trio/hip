@@ -10,64 +10,64 @@ Subpackages
 
 .. toctree::
 
-    urllib3.contrib
-    urllib3.util
+    hip.contrib
+    hip.util
 
 Submodules
 ----------
 
-urllib3.connectionpool module
------------------------------
-
-.. automodule:: urllib3.connectionpool
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-urllib3.exceptions module
+hip.connectionpool module
 -------------------------
 
-.. automodule:: urllib3.exceptions
+.. automodule:: hip.connectionpool
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.fields module
+hip.exceptions module
 ---------------------
 
-.. automodule:: urllib3.fields
+.. automodule:: hip.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.filepost module
------------------------
+hip.fields module
+-----------------
 
-.. automodule:: urllib3.filepost
+.. automodule:: hip.fields
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.poolmanager module
---------------------------
+hip.filepost module
+-------------------
 
-.. automodule:: urllib3.poolmanager
+.. automodule:: hip.filepost
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.request module
+hip.poolmanager module
 ----------------------
 
-.. automodule:: urllib3.request
+.. automodule:: hip.poolmanager
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.response module
------------------------
+hip.request module
+------------------
 
-.. automodule:: urllib3.response
+.. automodule:: hip.request
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+hip.response module
+-------------------
+
+.. automodule:: hip.response
     :members:
     :undoc-members:
     :show-inheritance:
@@ -76,7 +76,7 @@ urllib3.response module
 Module contents
 ---------------
 
-.. automodule:: urllib3
+.. automodule:: hip
     :members:
     :undoc-members:
     :show-inheritance:

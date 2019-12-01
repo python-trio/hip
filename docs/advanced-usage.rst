@@ -1,7 +1,7 @@
 Advanced Usage
 ==============
 
-.. currentmodule:: urllib3
+.. currentmodule:: hip
 
 
 Customizing pool behavior
@@ -232,7 +232,7 @@ be resolved in different ways.
 .. _disable_ssl_warnings:
 
 Making unverified HTTPS requests is **strongly** discouraged, however, if you
-understand the risks and wish to disable these warnings, you can use :func:`~urllib3.disable_warnings`::
+understand the risks and wish to disable these warnings, you can use :func:`~hip.disable_warnings`::
 
     >>> import urllib3
     >>> urllib3.disable_warnings()
