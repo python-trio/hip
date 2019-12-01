@@ -1,7 +1,6 @@
 import warnings
 import sys
 import errno
-import logging
 import socket
 import ssl
 import os
@@ -243,37 +242,3 @@ def requiresTLSv1_3():
     return pytest.mark.skipif(
         not getattr(ssl, "HAS_TLSv1_3", False), reason="Test requires TLSv1.3"
     )
-
-
-class _ListHandler(logging.Handler):
-    def __init__(self):
-        super(_ListHandler, self).__init__()
-        self.records = []
-
-    def emit(self, record):
-        self.records.append(record)
-
-
-class LogRecorder(object):
-    def __init__(self, target=logging.root):
-        super(LogRecorder, self).__init__()
-        self._target = target
-        self._handler = _ListHandler()
-
-    @property
-    def records(self):
-        return self._handler.records
-
-    def install(self):
-        self._target.addHandler(self._handler)
-
-    def uninstall(self):
-        self._target.removeHandler(self._handler)
-
-    def __enter__(self):
-        self.install()
-        return self.records
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.uninstall()
-        return False
