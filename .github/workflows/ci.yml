@@ -35,4 +35,4 @@ jobs:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       run: |
         python.exe -m pip install codecov
-        python.exe -m codecov
+        python.exe -m codecov -f coverage.xml
