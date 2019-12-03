@@ -243,7 +243,7 @@ class HTTPResponse(io.IOBase):
 
     @property
     def data(self):
-        # For backwords-compat with earlier hip 0.4 and earlier.
+        # For backwords-compat with urllib3 0.4 and earlier.
         if self._body is not None:
             return self._body
 
@@ -321,7 +321,7 @@ class HTTPResponse(io.IOBase):
     @contextmanager
     def _error_catcher(self):
         """
-        Catch low-level python exceptions, instead re-raising hip
+        Catch low-level python exceptions, instead re-raising Hip
         variants, so that low-level exceptions are not leaked in the
         high-level api.
 

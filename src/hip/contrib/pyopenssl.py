@@ -78,7 +78,7 @@ __all__ = ["inject_into_hip", "extract_from_hip"]
 # SNI always works.
 HAS_SNI = True
 
-# Map from hip to PyOpenSSL compatible parameter-values.
+# Map from Hip to PyOpenSSL compatible parameter-values.
 _openssl_versions = {
     util.PROTOCOL_TLS: OpenSSL.SSL.SSLv23_METHOD,
     ssl.PROTOCOL_TLSv1: OpenSSL.SSL.TLSv1_METHOD,
@@ -115,7 +115,7 @@ log = logging.getLogger(__name__)
 
 
 def inject_into_hip():
-    "Monkey-patch hip with PyOpenSSL-backed SSL-support."
+    "Monkey-patch Hip with PyOpenSSL-backed SSL-support."
 
     _validate_dependencies_met()
 
@@ -244,7 +244,7 @@ def get_subj_alt_name(peer_cert):
         # no SAN field is present.
         log.warning(
             "A problem was encountered with the certificate that prevented "
-            "hip from finding the SubjectAlternativeName field. This can "
+            "Hip from finding the SubjectAlternativeName field. This can "
             "affect certificate validation. The error was %s",
             e,
         )

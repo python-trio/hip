@@ -1,5 +1,5 @@
 """
-hip - Thread-safe connection pooling and re-using.
+Hip - Thread-safe connection pooling and re-using.
 """
 from __future__ import absolute_import
 import warnings
@@ -77,7 +77,7 @@ def add_stderr_logger(level=logging.DEBUG):
     Returns the handler after adding it.
     """
     # This method needs to be in this __init__.py to get the __name__ correct
-    # even if hip is vendored within another package.
+    # even if Hip is vendored within another package.
     logger = logging.getLogger(__name__)
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
@@ -106,6 +106,6 @@ warnings.simplefilter("default", exceptions.SNIMissingWarning, append=True)
 
 def disable_warnings(category=exceptions.HTTPWarning):
     """
-    Helper for quickly disabling all hip warnings.
+    Helper for quickly disabling all Hip warnings.
     """
     warnings.simplefilter("ignore", category)

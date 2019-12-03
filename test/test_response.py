@@ -561,7 +561,7 @@ class TestResponse(object):
             next(stream)
 
     def test_mock_httpresponse_stream(self):
-        # Mock out a HTTP Request that does enough to make it through hip's
+        # Mock out a HTTP Request that does enough to make it through Hip's
         # read() and close() calls, and also exhausts and underlying file
         # object.
         class MockHTTPRequest(object):

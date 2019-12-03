@@ -151,7 +151,7 @@ except ImportError:
         def wrap_socket(self, socket, server_hostname=None, server_side=False):
             warnings.warn(
                 "A true SSLContext object is not available. This prevents "
-                "hip from configuring SSL appropriately and may cause "
+                "Hip from configuring SSL appropriately and may cause "
                 "certain SSL connections to fail. You can upgrade to a newer "
                 "version of Python to solve this. For more information, see "
                 "https://hip.readthedocs.io/en/latest/advanced-usage.html"
@@ -387,7 +387,7 @@ def ssl_wrap_socket(
     context = ssl_context
     if context is None:
         # Note: This branch of code and all the variables in it are no longer
-        # used by hip itself. We should consider deprecating and removing
+        # used by Hip itself. We should consider deprecating and removing
         # this code.
         context = create_ssl_context(ssl_version, cert_reqs, ciphers=ciphers)
 

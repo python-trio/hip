@@ -6,7 +6,7 @@ they're pretty gross to work with.
 
 This code is a bastardised version of the code found in Will Bond's oscrypto
 library. An enormous debt is owed to him for blazing this trail for us. For
-that reason, this code should be considered to be covered both by hip's
+that reason, this code should be considered to be covered both by Hip's
 license and by oscrypto's:
 
     Copyright (c) 2015-2016 Will Bond <will@wbond.net>

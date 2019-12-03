@@ -7,8 +7,7 @@ import time
 
 from ..exceptions import TimeoutStateError
 
-# A sentinel value to indicate that no timeout was specified by the user in
-# hip
+# A sentinel value to indicate that no timeout was specified by the user in Hip
 _Default = object()
 
 
@@ -67,7 +66,7 @@ class Timeout(object):
 
     .. note::
 
-        Many factors can affect the total amount of time for hip to return
+        Many factors can affect the total amount of time for Hip to return
         an HTTP response.
 
         For example, Python's DNS resolver does not obey the timeout specified

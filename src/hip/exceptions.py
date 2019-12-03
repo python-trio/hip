@@ -218,7 +218,7 @@ class HeaderParsingError(HTTPError):
 
 
 class UnrewindableBodyError(HTTPError):
-    "hip encountered an error when trying to rewind a body"
+    "Hip encountered an error when trying to rewind a body"
     pass
 
 
@@ -234,7 +234,7 @@ class FailedTunnelError(HTTPError):
 
 class InvalidBodyError(HTTPError):
     """
-    An attempt was made to send a request with a body object that hip does
+    An attempt was made to send a request with a body object that Hip does
     not support.
     """
 

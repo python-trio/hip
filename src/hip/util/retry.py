@@ -114,7 +114,7 @@ class Retry(object):
     :param float backoff_factor:
         A backoff factor to apply between attempts after the second try
         (most errors are resolved immediately by a second try without a
-        delay). hip will sleep for::
+        delay). Hip will sleep for::
 
             {backoff factor} * (2 ** ({number of total retries} - 1))
 

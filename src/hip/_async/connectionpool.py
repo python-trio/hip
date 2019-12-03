@@ -93,7 +93,7 @@ def _build_context(
     ssl_version,
 ):
     """
-    Creates a hip context suitable for a given request based on a
+    Creates a Hip context suitable for a given request based on a
     collection of possible properties of that context.
     """
     if context is None:

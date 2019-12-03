@@ -126,7 +126,7 @@ class TestConnectionPool(object):
         ],
     )
     def test_same_host_no_port_http(self, a, b):
-        # This test was introduced in urllib3/urllib3#801 to deal with the fact that hip
+        # This test was introduced in urllib3/urllib3#801 to deal with the fact that Hip
         # never initializes ConnectionPool objects with port=None.
         with HTTPConnectionPool(a) as c:
             assert c.is_same_host(b)
@@ -143,7 +143,7 @@ class TestConnectionPool(object):
         ],
     )
     def test_same_host_no_port_https(self, a, b):
-        # This test was introduced in urllib3/urllib3#801 to deal with the fact that hip
+        # This test was introduced in urllib3/urllib3#801 to deal with the fact that Hip
         # never initializes ConnectionPool objects with port=None.
         with HTTPSConnectionPool(a) as c:
             assert c.is_same_host(b)

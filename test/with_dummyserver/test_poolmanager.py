@@ -424,7 +424,7 @@ class TestRetry(HTTPDummyServerTestCase):
             assert resp.status == 418
 
     def test_default_method_whitelist_retried(self):
-        """ hip should retry methods in the default method whitelist """
+        """Hip should retry methods in the default method whitelist"""
         retry = Retry(total=1, status_forcelist=[418])
 
         with PoolManager() as http:
