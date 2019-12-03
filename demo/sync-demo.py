@@ -6,7 +6,7 @@ import hip
 
 URL = "http://httpbin.org/uuid"
 
-print("--- hip using synchronous sockets ---")
+print("--- synchronous sockets ---")
 with hip.PoolManager() as http:
     print("URL:", URL)
     r = http.request("GET", URL, preload_content=False)

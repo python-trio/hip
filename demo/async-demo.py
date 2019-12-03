@@ -12,21 +12,21 @@ async def main(backend=None):
         print("Status:", r.status)
         print("Data:", await r.read())
 
-print("--- hip using Trio ---")
+print("--- Trio ---")
 import trio
 trio.run(main)
 
-print("\n--- hip using asyncio (via AnyIO) ---")
+print("\n--- asyncio (via AnyIO) ---")
 import asyncio
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 loop.close()
 
-print("\n--- hip using curio (via AnyIO) ---")
+print("\n--- Curio (via AnyIO) ---")
 import curio
 curio.run(main)
 
-print("\n--- hip using Twisted ---")
+print("\n--- Twisted ---")
 from twisted.internet.task import react
 from twisted.internet.defer import ensureDeferred
 def twisted_main(reactor):
