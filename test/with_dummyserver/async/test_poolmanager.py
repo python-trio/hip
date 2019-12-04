@@ -1,30 +1,40 @@
-from dummyserver.testcase import HTTPDummyServerTestCase
+import pytest
+
 from hip import AsyncPoolManager
 
 
-class TestPoolManager(HTTPDummyServerTestCase):
-    @classmethod
-    def setup_class(self):
-        super(TestPoolManager, self).setup_class()
-        self.base_url = "http://%s:%d" % (self.host, self.port)
-        self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
+@pytest.mark.parametrize(
+    "backend",
+    [
+        pytest.param(
+            "trio", id="trio-native", marks=[pytest.mark.anyio(backend="trio")]
+        ),
+        pytest.param(
+            "anyio", id="anyio-trio", marks=[pytest.mark.anyio(backend="trio")]
+        ),
+        pytest.param(
+            "anyio", id="anyio-curio", marks=[pytest.mark.anyio(backend="curio")]
+        ),
+        pytest.param(
+            "anyio", id="anyio-asyncio", marks=[pytest.mark.anyio(backend="asyncio")]
+        ),
+    ],
+)
+async def test_redirect(dummy_server_url, backend):
+    with AsyncPoolManager(backend=backend) as http:
+        r = await http.request(
+            "GET",
+            "%s/redirect" % dummy_server_url,
+            fields={"target": "%s/" % dummy_server_url},
+            redirect=False,
+        )
+        assert r.status == 303
 
-    async def test_redirect(self):
-        with AsyncPoolManager() as http:
-            r = await http.request(
-                "GET",
-                "%s/redirect" % self.base_url,
-                fields={"target": "%s/" % self.base_url},
-                redirect=False,
-            )
+        r = await http.request(
+            "GET",
+            "%s/redirect" % dummy_server_url,
+            fields={"target": "%s/" % dummy_server_url},
+        )
 
-            assert r.status == 303
-
-            r = await http.request(
-                "GET",
-                "%s/redirect" % self.base_url,
-                fields={"target": "%s/" % self.base_url},
-            )
-
-            assert r.status == 200
-            assert r.data == b"Dummy server!"
+        assert r.status == 200
+        assert await r.read() == b"Dummy server!"
