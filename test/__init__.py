@@ -13,9 +13,9 @@ try:
 except ImportError:
     brotli = None
 
-from urllib3.exceptions import HTTPWarning
-from urllib3.packages import six
-from urllib3.util import ssl_
+from hip.exceptions import HTTPWarning
+from hip.packages import six
+from hip.util import ssl_
 
 # We need a host that will not immediately close the connection with a TCP
 # Reset. SO suggests this hostname

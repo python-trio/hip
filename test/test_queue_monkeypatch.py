@@ -4,9 +4,9 @@ import mock
 
 import pytest
 
-from urllib3 import HTTPConnectionPool
-from urllib3.exceptions import EmptyPoolError
-from urllib3.packages.six.moves import queue
+from hip import HTTPConnectionPool
+from hip.exceptions import EmptyPoolError
+from hip.packages.six.moves import queue
 
 
 class BadError(Exception):

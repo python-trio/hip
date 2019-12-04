@@ -9,7 +9,7 @@ from ..packages import six
 url_attrs = ["scheme", "auth", "host", "port", "path", "query", "fragment"]
 
 # We only want to normalize urls with an HTTP(S) scheme.
-# urllib3 infers URLs without a scheme (None) to be http.
+# Hip infers URLs without a scheme (None) to be http.
 NORMALIZABLE_SCHEMES = ("http", "https", None)
 
 # Almost all of these patterns were derived from the

@@ -1,7 +1,7 @@
 import pytest
 
-from urllib3.fields import format_header_param_rfc2231, guess_content_type, RequestField
-from urllib3.packages.six import u
+from hip.fields import format_header_param_rfc2231, guess_content_type, RequestField
+from hip.packages.six import u
 
 
 class TestRequestField(object):

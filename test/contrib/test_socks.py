@@ -1,8 +1,8 @@
 import threading
 import socket
 
-from urllib3.contrib import socks
-from urllib3.exceptions import ConnectTimeoutError, NewConnectionError
+from hip.contrib import socks
+from hip.exceptions import ConnectTimeoutError, NewConnectionError
 
 from dummyserver.server import DEFAULT_CERTS, DEFAULT_CA
 from dummyserver.testcase import IPV4SocketDummyServerTestCase
@@ -12,7 +12,7 @@ from test import SHORT_TIMEOUT
 
 try:
     import ssl
-    from urllib3.util import ssl_ as better_ssl
+    from hip.util import ssl_ as better_ssl
 
     HAS_SSL = True
 except ImportError:

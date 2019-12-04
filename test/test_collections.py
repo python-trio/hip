@@ -1,7 +1,7 @@
-from urllib3._collections import HTTPHeaderDict, RecentlyUsedContainer as Container
+from hip._collections import HTTPHeaderDict, RecentlyUsedContainer as Container
 import pytest
 
-from urllib3.packages import six
+from hip.packages import six
 
 xrange = six.moves.xrange
 
@@ -156,7 +156,7 @@ class TestHTTPHeaderDict(object):
         assert "ab" in h
 
     def test_create_from_iterator(self):
-        teststr = "urllib3ontherocks"
+        teststr = "hipontherocks"
         h = HTTPHeaderDict((c, c * 5) for c in teststr)
         assert len(h) == len(set(teststr))
 

@@ -10,18 +10,18 @@ from itertools import chain
 from mock import patch, Mock
 import pytest
 
-from urllib3 import add_stderr_logger, disable_warnings
-from urllib3.util.request import make_headers, rewind_body, _FAILEDTELL
-from urllib3.util.retry import Retry
-from urllib3.util.timeout import Timeout
-from urllib3.util.url import get_host, parse_url, split_first, Url
-from urllib3.util.ssl_ import (
+from hip import add_stderr_logger, disable_warnings
+from hip.util.request import make_headers, rewind_body, _FAILEDTELL
+from hip.util.retry import Retry
+from hip.util.timeout import Timeout
+from hip.util.url import get_host, parse_url, split_first, Url
+from hip.util.ssl_ import (
     resolve_cert_reqs,
     resolve_ssl_version,
     ssl_wrap_socket,
     _const_compare_digest_backport,
 )
-from urllib3.exceptions import (
+from hip.exceptions import (
     LocationParseError,
     TimeoutStateError,
     InsecureRequestWarning,
@@ -29,9 +29,9 @@ from urllib3.exceptions import (
     InvalidHeader,
     UnrewindableBodyError,
 )
-from urllib3.util.connection import allowed_gai_family, _has_ipv6
-from urllib3.util import ssl_
-from urllib3.packages import six
+from hip.util.connection import allowed_gai_family, _has_ipv6
+from hip.util import ssl_
+from hip.packages import six
 
 from . import clear_warnings
 
@@ -552,7 +552,7 @@ class TestUtil(object):
 
     def test_add_stderr_logger(self):
         handler = add_stderr_logger(level=logging.INFO)  # Don't actually print debug
-        logger = logging.getLogger("urllib3")
+        logger = logging.getLogger("hip")
         assert handler in logger.handlers
 
         logger.debug("Testing add_stderr_logger")
@@ -591,7 +591,7 @@ class TestUtil(object):
             Timeout(**kwargs)
         assert message in str(e.value)
 
-    @patch("urllib3.util.timeout.current_time")
+    @patch("hip.util.timeout.current_time")
     def test_timeout(self, current_time):
         timeout = Timeout(total=3)
 
@@ -639,7 +639,7 @@ class TestUtil(object):
         timeout = Timeout(connect=1, read=None, total=3)
         assert str(timeout) == "Timeout(connect=1, read=None, total=3)"
 
-    @patch("urllib3.util.timeout.current_time")
+    @patch("hip.util.timeout.current_time")
     def test_timeout_elapsed(self, current_time):
         current_time.return_value = TIMEOUT_EPOCH
         timeout = Timeout(total=3)
@@ -689,7 +689,7 @@ class TestUtil(object):
 
         mock_context.load_cert_chain.assert_called_once_with("/path/to/certfile", None)
 
-    @patch("urllib3.util.ssl_.create_ssl_context")
+    @patch("hip.util.ssl_.create_ssl_context")
     def test_ssl_wrap_socket_creates_new_context(self, create_ssl_context):
         socket = object()
         ssl_wrap_socket(sock=socket, cert_reqs="CERT_REQUIRED")
@@ -764,11 +764,11 @@ class TestUtil(object):
                 assert _has_ipv6("::1")
 
     def test_ip_family_ipv6_enabled(self):
-        with patch("urllib3.util.connection.HAS_IPV6", True):
+        with patch("hip.util.connection.HAS_IPV6", True):
             assert allowed_gai_family() == socket.AF_UNSPEC
 
     def test_ip_family_ipv6_disabled(self):
-        with patch("urllib3.util.connection.HAS_IPV6", False):
+        with patch("hip.util.connection.HAS_IPV6", False):
             assert allowed_gai_family() == socket.AF_INET
 
     @pytest.mark.parametrize("value", ["-1", "+1", "1.0", six.u("\xb2")])  # \xb2 = ^2

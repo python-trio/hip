@@ -1,12 +1,12 @@
 import pytest
 
-import urllib3
-from urllib3.backends import Backend
-from urllib3._backends._loader import normalize_backend, load_backend
+import hip
+from hip.backends import Backend
+from hip._backends._loader import normalize_backend, load_backend
 
 
 requires_async_pool_manager = pytest.mark.skipif(
-    not hasattr(urllib3, "AsyncPoolManager"),
+    not hasattr(hip, "AsyncPoolManager"),
     reason="async backends require AsyncPoolManager",
 )
 

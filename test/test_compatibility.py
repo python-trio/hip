@@ -1,5 +1,5 @@
-from urllib3.response import HTTPResponse
-from urllib3.packages.six.moves import http_cookiejar, urllib
+from hip.response import HTTPResponse
+from hip.packages.six.moves import http_cookiejar, urllib
 
 
 class TestCookiejar(object):

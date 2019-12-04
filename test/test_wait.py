@@ -11,7 +11,7 @@ import time
 import pytest
 
 from .socketpair_helper import socketpair
-from urllib3.util.wait import (
+from hip.util.wait import (
     wait_for_read,
     wait_for_write,
     wait_for_socket,

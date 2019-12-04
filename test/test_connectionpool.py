@@ -3,18 +3,18 @@ from __future__ import absolute_import
 import ssl
 import pytest
 
-from urllib3.base import Response
-from urllib3.connectionpool import (
+from hip.base import Response
+from hip.connectionpool import (
     connection_from_url,
     HTTPConnectionPool,
     HTTPSConnectionPool,
 )
-from urllib3._sync.connection import HTTP1Connection
-from urllib3.response import HTTPResponse
-from urllib3.util.timeout import Timeout
-from urllib3.packages.six.moves.queue import Empty
-from urllib3.packages.ssl_match_hostname import CertificateError
-from urllib3.exceptions import (
+from hip._sync.connection import HTTP1Connection
+from hip.response import HTTPResponse
+from hip.util.timeout import Timeout
+from hip.packages.six.moves.queue import Empty
+from hip.packages.ssl_match_hostname import CertificateError
+from hip.exceptions import (
     ClosedPoolError,
     EmptyPoolError,
     LocationValueError,
@@ -126,7 +126,7 @@ class TestConnectionPool(object):
         ],
     )
     def test_same_host_no_port_http(self, a, b):
-        # This test was introduced in #801 to deal with the fact that urllib3
+        # This test was introduced in urllib3/urllib3#801 to deal with the fact that Hip
         # never initializes ConnectionPool objects with port=None.
         with HTTPConnectionPool(a) as c:
             assert c.is_same_host(b)
@@ -143,7 +143,7 @@ class TestConnectionPool(object):
         ],
     )
     def test_same_host_no_port_https(self, a, b):
-        # This test was introduced in #801 to deal with the fact that urllib3
+        # This test was introduced in urllib3/urllib3#801 to deal with the fact that Hip
         # never initializes ConnectionPool objects with port=None.
         with HTTPSConnectionPool(a) as c:
             assert c.is_same_host(b)

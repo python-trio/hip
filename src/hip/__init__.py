@@ -1,5 +1,5 @@
 """
-urllib3 - Thread-safe connection pooling and re-using.
+Hip - Thread-safe connection pooling and re-using.
 """
 from __future__ import absolute_import
 import warnings
@@ -45,15 +45,15 @@ __all__ = [
 import sys
 
 if sys.version_info >= (3, 6):
-    from urllib3._async.connectionpool import (  # NOQA
+    from hip._async.connectionpool import (  # NOQA
         HTTPConnectionPool as AsyncHTTPConnectionPool,
         HTTPSConnectionPool as AsyncHTTPSConnectionPool,
     )
-    from urllib3._async.poolmanager import (  # NOQA
+    from hip._async.poolmanager import (  # NOQA
         PoolManager as AsyncPoolManager,
         ProxyManager as AsyncProxyManager,
     )
-    from urllib3._async.response import HTTPResponse as AsyncHTTPResponse  # NOQA
+    from hip._async.response import HTTPResponse as AsyncHTTPResponse  # NOQA
 
     __all__.extend(
         (
@@ -77,7 +77,7 @@ def add_stderr_logger(level=logging.DEBUG):
     Returns the handler after adding it.
     """
     # This method needs to be in this __init__.py to get the __name__ correct
-    # even if urllib3 is vendored within another package.
+    # even if Hip is vendored within another package.
     logger = logging.getLogger(__name__)
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
@@ -106,6 +106,6 @@ warnings.simplefilter("default", exceptions.SNIMissingWarning, append=True)
 
 def disable_warnings(category=exceptions.HTTPWarning):
     """
-    Helper for quickly disabling all urllib3 warnings.
+    Helper for quickly disabling all Hip warnings.
     """
     warnings.simplefilter("ignore", category)

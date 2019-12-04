@@ -44,9 +44,9 @@ from test import (
     SHORT_TIMEOUT,
     LONG_TIMEOUT,
 )
-from urllib3 import HTTPSConnectionPool
-from urllib3._sync.connection import RECENT_DATE
-from urllib3.exceptions import (
+from hip import HTTPSConnectionPool
+from hip._sync.connection import RECENT_DATE
+from hip.exceptions import (
     SSLError,
     ConnectTimeoutError,
     InsecureRequestWarning,
@@ -55,9 +55,9 @@ from urllib3.exceptions import (
     MaxRetryError,
     ProtocolError,
 )
-from urllib3.packages import six
-from urllib3.util.timeout import Timeout
-import urllib3.util as util
+from hip.packages import six
+from hip.util.timeout import Timeout
+import hip.util as util
 
 # Retry failed tests
 pytestmark = pytest.mark.flaky
@@ -67,7 +67,7 @@ ResourceWarning = getattr(
 )
 
 
-log = logging.getLogger("urllib3.connectionpool")
+log = logging.getLogger("hip.connectionpool")
 log.setLevel(logging.NOTSET)
 log.addHandler(logging.StreamHandler(sys.stdout))
 
@@ -394,7 +394,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
             # socket, so only add this assertion if the attribute is there (i.e.
             # the python ssl module).
             # XXX This is highly-specific to SyncBackend
-            # See https://github.com/python-trio/urllib3/pull/54#discussion_r241683895
+            # See https://github.com/python-trio/hip/pull/54#discussion_r241683895
             # for potential solutions
             sock = conn._sock._sock
             if hasattr(sock, "server_hostname"):
@@ -582,7 +582,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
 
     @onlyPy279OrNewer
     def test_ssl_wrong_system_time(self):
-        with mock.patch("urllib3._sync.connection.datetime") as mock_date:
+        with mock.patch("hip._sync.connection.datetime") as mock_date:
             mock_date.date.today.return_value = datetime.date(1970, 1, 1)
 
             w = self._request_without_resource_warnings("GET", "/")
@@ -671,7 +671,7 @@ class TestHTTPS_IPSAN(HTTPSDummyServerTestCase):
     certs = IP_SAN_CERTS
 
     def test_can_validate_ip_san(self):
-        """Ensure that urllib3 can validate SANs with IP addresses in them."""
+        """Ensure that hip can validate SANs with IP addresses in them."""
         try:
             import ipaddress  # noqa: F401
         except ImportError:
@@ -701,7 +701,7 @@ class TestHTTPS_IPV6SAN(IPV6HTTPSDummyServerTestCase):
     certs = IPV6_SAN_CERTS
 
     def test_can_validate_ipv6_san(self):
-        """Ensure that urllib3 can validate SANs with IPv6 addresses in them."""
+        """Ensure that hip can validate SANs with IPv6 addresses in them."""
         try:
             import ipaddress  # noqa: F401
         except ImportError:

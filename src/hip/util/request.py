@@ -37,7 +37,7 @@ def make_headers(
 
     :param user_agent:
         String representing the user-agent you want, such as
-        "python-urllib3/0.6"
+        "python-hip/0.6"
 
     :param basic_auth:
         Colon-separated username:password string for 'authorization: basic ...'

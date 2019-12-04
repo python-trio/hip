@@ -33,7 +33,7 @@ from ..exceptions import (
     InvalidBodyError,
     ProtocolError,
 )
-from urllib3.packages import six
+from hip.packages import six
 from ..util import ssl_ as ssl_util
 from .._backends._common import LoopAbort
 from .._backends._loader import load_backend, normalize_backend
@@ -119,7 +119,7 @@ def _read_readable(readable):
 # XX this should return an async iterator
 def _make_body_iterable(body):
     """
-    This function turns all possible body types that urllib3 supports into an
+    This function turns all possible body types that Hip supports into an
     iterable of bytes. The goal is to expose a uniform structure to request
     bodies so that they all appear to be identical to the low-level code.
 
@@ -195,7 +195,7 @@ def _request_bytes_iterable(request, state_machine):
 
 def _response_from_h11(h11_response, body_object):
     """
-    Given a h11 Response object, build a urllib3 response object and return it.
+    Given a h11 Response object, build a Hip response object and return it.
     """
     if bytes(h11_response.http_version) not in _SUPPORTED_VERSIONS:
         raise BadVersionError(h11_response.http_version)
@@ -212,7 +212,7 @@ def _response_from_h11(h11_response, body_object):
 
 def _build_tunnel_request(host, port, headers):
     """
-    Builds a urllib3 Request object that is set up correctly to request a proxy
+    Builds a Hip Request object that is set up correctly to request a proxy
     to establish a TCP tunnel to the remote host.
     """
 

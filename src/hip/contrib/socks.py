@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 This module contains provisional support for SOCKS proxies from within
-urllib3. This module supports SOCKS4, SOCKS4A (an extension of SOCKS4), and
+Hip. This module supports SOCKS4, SOCKS4A (an extension of SOCKS4), and
 SOCKS5. To enable its functionality, either install PySocks or install this
 module with the ``socks`` extra.
 
-The SOCKS implementation supports the full range of urllib3 features. It also
+The SOCKS implementation supports the full range of Hip features. It also
 supports the following SOCKS features:
 
 - SOCKS4A (``proxy_url='socks4a://...``)
@@ -44,9 +44,9 @@ except ImportError:
 
     warnings.warn(
         (
-            "SOCKS support in urllib3 requires the installation of optional "
+            "SOCKS support in Hip requires the installation of optional "
             "dependencies: specifically, PySocks.  For more information, see "
-            "https://urllib3.readthedocs.io/en/latest/contrib.html#socks-proxies"
+            "https://hip.readthedocs.io/en/latest/contrib.html#socks-proxies"
         ),
         DependencyWarning,
     )
@@ -132,7 +132,7 @@ class SOCKSHTTPSConnectionPool(HTTPSConnectionPool):
 
 class SOCKSProxyManager(PoolManager):
     """
-    A version of the urllib3 ProxyManager that routes connections via the
+    A version of the Hip ProxyManager that routes connections via the
     defined SOCKS proxy.
     """
 

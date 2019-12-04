@@ -2,9 +2,9 @@
 
 import pytest
 
-from urllib3 import HTTPConnectionPool
-from urllib3.exceptions import InvalidBodyError
-from urllib3.util.retry import Retry
+from hip import HTTPConnectionPool
+from hip.exceptions import InvalidBodyError
+from hip.util.retry import Retry
 from dummyserver.testcase import SocketDummyServerTestCase, consume_socket
 
 # Retry failed tests

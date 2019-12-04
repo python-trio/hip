@@ -15,7 +15,7 @@ import h11
 
 from .._collections import HTTPHeaderDict
 from ..exceptions import ProtocolError, DecodeError, ReadTimeoutError
-from urllib3.packages.six import string_types as basestring
+from hip.packages.six import string_types as basestring
 from ..util.ssl_ import BaseSSLError
 
 log = logging.getLogger(__name__)
@@ -161,7 +161,7 @@ class HTTPResponse(io.IOBase):
         'content-encoding' header.
 
     :param retries:
-        The retries contains the last :class:`~urllib3.util.retry.Retry` that
+        The retries contains the last :class:`~hip.util.retry.Retry` that
         was used during the request.
     """
 
@@ -243,7 +243,7 @@ class HTTPResponse(io.IOBase):
 
     @property
     def data(self):
-        # For backwords-compat with earlier urllib3 0.4 and earlier.
+        # For backwords-compat with urllib3 0.4 and earlier.
         if self._body is not None:
             return self._body
 
@@ -321,7 +321,7 @@ class HTTPResponse(io.IOBase):
     @contextmanager
     def _error_catcher(self):
         """
-        Catch low-level python exceptions, instead re-raising urllib3
+        Catch low-level python exceptions, instead re-raising Hip
         variants, so that low-level exceptions are not leaked in the
         high-level api.
 
@@ -477,8 +477,8 @@ class HTTPResponse(io.IOBase):
     @classmethod
     def from_base(ResponseCls, r, **response_kw):
         """
-        Given an :class:`urllib3.base.Response` instance ``r``, return a
-        corresponding :class:`urllib3.response.HTTPResponse` object.
+        Given an :class:`hip.base.Response` instance ``r``, return a
+        corresponding :class:`hip.response.HTTPResponse` object.
 
         Remaining parameters are passed to the HTTPResponse constructor, along
         with ``original_response=r``.

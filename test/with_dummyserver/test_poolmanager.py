@@ -6,10 +6,10 @@ import pytest
 
 from dummyserver.server import HAS_IPV6
 from dummyserver.testcase import HTTPDummyServerTestCase, IPv6HTTPDummyServerTestCase
-from urllib3.base import DEFAULT_PORTS
-from urllib3.poolmanager import PoolManager
-from urllib3.exceptions import MaxRetryError, NewConnectionError, UnrewindableBodyError
-from urllib3.util.retry import Retry, RequestHistory
+from hip.base import DEFAULT_PORTS
+from hip.poolmanager import PoolManager
+from hip.exceptions import MaxRetryError, NewConnectionError, UnrewindableBodyError
+from hip.util.retry import Retry, RequestHistory
 
 from test import LONG_TIMEOUT
 
@@ -424,7 +424,7 @@ class TestRetry(HTTPDummyServerTestCase):
             assert resp.status == 418
 
     def test_default_method_whitelist_retried(self):
-        """ urllib3 should retry methods in the default method whitelist """
+        """Hip should retry methods in the default method whitelist"""
         retry = Retry(total=1, status_forcelist=[418])
 
         with PoolManager() as http:

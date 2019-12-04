@@ -4,14 +4,14 @@ import pytest
 from mock import patch, Mock
 
 try:
-    from urllib3.contrib.pyopenssl import inject_into_hip, extract_from_hip
+    from hip.contrib.pyopenssl import inject_into_hip, extract_from_hip
 except ImportError:
     pass
 
 
 def setup_module():
     try:
-        from urllib3.contrib.pyopenssl import inject_into_hip
+        from hip.contrib.pyopenssl import inject_into_hip
 
         inject_into_hip()
     except ImportError as e:
@@ -20,7 +20,7 @@ def setup_module():
 
 def teardown_module():
     try:
-        from urllib3.contrib.pyopenssl import extract_from_hip
+        from hip.contrib.pyopenssl import extract_from_hip
 
         extract_from_hip()
     except ImportError:

@@ -1,8 +1,8 @@
 import mock
 
 import pytest
-from urllib3.util import ssl_
-from urllib3.exceptions import SNIMissingWarning
+from hip.util import ssl_
+from hip.exceptions import SNIMissingWarning
 
 from test import notPyPy2
 

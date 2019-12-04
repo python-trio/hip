@@ -9,7 +9,7 @@ pytestmark = pytest.mark.skip(
 )
 
 try:
-    from urllib3.contrib.pyopenssl import _dnsname_to_stdlib, get_subj_alt_name
+    from hip.contrib.pyopenssl import _dnsname_to_stdlib, get_subj_alt_name
     from cryptography import x509
     from OpenSSL.crypto import FILETYPE_PEM, load_certificate
 except ImportError:
@@ -18,7 +18,7 @@ except ImportError:
 
 def setup_module():
     try:
-        from urllib3.contrib.pyopenssl import inject_into_hip
+        from hip.contrib.pyopenssl import inject_into_hip
 
         inject_into_hip()
     except ImportError as e:
@@ -27,7 +27,7 @@ def setup_module():
 
 def teardown_module():
     try:
-        from urllib3.contrib.pyopenssl import extract_from_hip
+        from hip.contrib.pyopenssl import extract_from_hip
 
         extract_from_hip()
     except ImportError:
@@ -85,7 +85,7 @@ class TestPyOpenSSLHelpers(object):
 
         assert _dnsname_to_stdlib(name) == expected_result
 
-    @mock.patch("urllib3.contrib.pyopenssl.log.warning")
+    @mock.patch("hip.contrib.pyopenssl.log.warning")
     def test_get_subj_alt_name(self, mock_warning):
         """
         If a certificate has two subject alternative names, cryptography raises

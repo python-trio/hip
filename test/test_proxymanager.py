@@ -1,11 +1,11 @@
 import pytest
 
-from urllib3.poolmanager import ProxyManager
+from hip.poolmanager import ProxyManager
 
 
 class TestProxyManager(object):
     def test_proxy_headers(self):
-        url = "http://pypi.org/project/urllib3/"
+        url = "http://pypi.org/project/hip/"
         with ProxyManager("http://something:1234") as p:
             # Verify default headers
             default_headers = {"Accept": "*/*", "Host": "pypi.org"}
@@ -27,7 +27,7 @@ class TestProxyManager(object):
             provided_headers = {"Accept": "application/json"}
             expected_headers = provided_headers.copy()
             expected_headers.update({"Host": "pypi.org:8080"})
-            url_with_port = "http://pypi.org:8080/project/urllib3/"
+            url_with_port = "http://pypi.org:8080/project/hip/"
             headers = p._set_proxy_headers(url_with_port, provided_headers)
 
             assert headers == expected_headers

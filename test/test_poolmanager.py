@@ -2,11 +2,11 @@ import socket
 
 import pytest
 
-from urllib3.poolmanager import PoolManager
-from urllib3._sync.poolmanager import key_fn_by_scheme, PoolKey
-from urllib3 import connection_from_url
-from urllib3.exceptions import ClosedPoolError, LocationValueError
-from urllib3.util import retry, timeout, ssl_
+from hip.poolmanager import PoolManager
+from hip._sync.poolmanager import key_fn_by_scheme, PoolKey
+from hip import connection_from_url
+from hip.exceptions import ClosedPoolError, LocationValueError
+from hip.util import retry, timeout, ssl_
 
 from dummyserver.server import CERTS_PATH, DEFAULT_CA, DEFAULT_CERTS
 
