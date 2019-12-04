@@ -32,7 +32,7 @@ jobs:
         nox -s test-${{ matrix.python-version }}
     - name: Coverage upload
       env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        CODECOV_TOKEN: 3bb38a90-137e-4efe-9627-ca66de472c13
       run: |
         python.exe -m pip install codecov
         python.exe -m codecov -f coverage.xml
