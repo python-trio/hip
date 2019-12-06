@@ -1,3 +1,5 @@
+import pytest
+
 from dummyserver.testcase import HTTPDummyServerTestCase
 from hip import AsyncPoolManager
 
@@ -9,6 +11,7 @@ class TestPoolManager(HTTPDummyServerTestCase):
         self.base_url = "http://%s:%d" % (self.host, self.port)
         self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
 
+    @pytest.mark.trio
     async def test_redirect(self):
         with AsyncPoolManager() as http:
             r = await http.request(
