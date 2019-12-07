@@ -1,32 +1,23 @@
-import pytest
-
-from dummyserver.testcase import HTTPDummyServerTestCase
 from hip import AsyncPoolManager
 
+from test.with_dummyserver import conftest
 
-class TestPoolManager(HTTPDummyServerTestCase):
-    @classmethod
-    def setup_class(self):
-        super(TestPoolManager, self).setup_class()
-        self.base_url = "http://%s:%d" % (self.host, self.port)
-        self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
 
-    @pytest.mark.trio
-    async def test_redirect(self):
-        with AsyncPoolManager() as http:
+class TestPoolManager:
+    @conftest.test_all_backends
+    async def test_redirect(self, http_server, backend):
+        base_url = "http://{}:{}".format(http_server.host, http_server.port)
+        with AsyncPoolManager(backend=backend) as http:
             r = await http.request(
                 "GET",
-                "%s/redirect" % self.base_url,
-                fields={"target": "%s/" % self.base_url},
+                "%s/redirect" % base_url,
+                fields={"target": "%s/" % base_url},
                 redirect=False,
             )
-
             assert r.status == 303
 
             r = await http.request(
-                "GET",
-                "%s/redirect" % self.base_url,
-                fields={"target": "%s/" % self.base_url},
+                "GET", "%s/redirect" % base_url, fields={"target": "%s/" % base_url}
             )
 
             assert r.status == 200

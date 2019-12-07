@@ -6,7 +6,7 @@ import pytest
 from tornado import web, ioloop
 
 from dummyserver.handlers import TestingApp
-from dummyserver.server import NO_SAN_CA, NO_SAN_CERTS, run_tornado_app
+from dummyserver.server import DEFAULT_CERTS, NO_SAN_CA, NO_SAN_CERTS, run_tornado_app
 
 try:
     import asyncio
@@ -14,6 +14,24 @@ except ImportError:
     asyncio = None
 
 ServerConfig = collections.namedtuple("ServerConfig", ["host", "port", "ca_certs"])
+
+test_all_backends = pytest.mark.parametrize(
+    "backend",
+    [
+        pytest.param(
+            "trio", id="trio-native", marks=[pytest.mark.anyio(backend="trio")]
+        ),
+        pytest.param(
+            "anyio", id="anyio-trio", marks=[pytest.mark.anyio(backend="trio")]
+        ),
+        pytest.param(
+            "anyio", id="anyio-curio", marks=[pytest.mark.anyio(backend="curio")]
+        ),
+        pytest.param(
+            "anyio", id="anyio-asyncio", marks=[pytest.mark.anyio(backend="asyncio")]
+        ),
+    ],
+)
 
 
 @contextlib.contextmanager
@@ -43,6 +61,12 @@ def run_server_in_thread(scheme, host, ca_certs, server_certs):
     ctx["io_loop"].add_callback(ctx["server"].stop)
     ctx["io_loop"].add_callback(ctx["io_loop"].stop)
     server_thread.join()
+
+
+@pytest.fixture
+def http_server():
+    with run_server_in_thread("http", "localhost", None, DEFAULT_CERTS) as cfg:
+        yield cfg
 
 
 @pytest.fixture
