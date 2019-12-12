@@ -31,12 +31,6 @@ env:
 
 matrix:
   include:
-    # Lint & documentation.
-    - python: 3.6
-      env: NOX_SESSION=lint
-    - python: 3.6
-      env: NOX_SESSION=docs
-
     # Unit tests
     - python: 2.7
       env: NOX_SESSION=test-2.7
@@ -57,34 +51,6 @@ matrix:
       env: NOX_SESSION=google_brotli-2
     - python: 3.7
       env: NOX_SESSION=google_brotli-3
-
-    # OS X unit tests.
-    - language: generic
-      os: osx
-      env: NOX_SESSION=test-2.7
-    - language: generic
-      os: osx
-      env: NOX_SESSION=test-3.5
-    - language: generic
-      os: osx
-      env: NOX_SESSION=test-3.6
-    - language: generic
-      os: osx
-      env: NOX_SESSION=test-3.7
-
-    - python: 3.7
-      stage: deploy
-      script:
-        - ./_travis/deploy.sh
-
-  allow_failures:
-    # MacPython 3.5 only supports TLS 1.1 by default, which fails whenever
-    # easy_install fetchs packages, which is required by Twisted. Giving up on
-    # testing MacPython 3.5 on Travis for this reason.
-    # https://github.com/tox-dev/tox/issues/809#issuecomment-443436586
-    - language: generic
-      os: osx
-      env: NOX_SESSION=test-3.5
 
 stages:
   - name: test

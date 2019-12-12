@@ -1,38 +1,111 @@
+---
 name: CI
 
 on: [push, pull_request]
 
 jobs:
-  Windows:
+  lint:
+    runs-on: ubuntu-latest
 
-    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python3.7 -m pip install nox
+      - name: Lint the code
+        run: nox -s lint
+
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python3.7 -m pip install nox
+      - name: Build the docs
+        run: nox -s docs
+
+  macOS:
+    runs-on: macos-latest
+    
     strategy:
       fail-fast: false
       matrix:
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python 3.7 to run nox
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    - name: Set up Python ${{ matrix.python-version }}
-      if: matrix.python_version != '3.7'
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        # Work around https://github.com/theacodes/nox/issues/250
-        Remove-Item C:\ProgramData\Chocolatey\bin\python2.7.exe
-        py -3.7 -m pip install nox
-    - name: Test
-      run: |
-        nox -s test-${{ matrix.python-version }}
-    - name: Coverage upload
-      env:
-        CODECOV_TOKEN: 3bb38a90-137e-4efe-9627-ca66de472c13
-      run: |
-        python.exe -m pip install codecov
-        python.exe -m codecov -f coverage.xml
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: Set Up Python 3.7 to run nox
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Set Up Python - ${{ matrix.python-version }}
+        if: matrix.python_version != '3.7'
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          python3.7 -m pip install --upgrade nox
+      - name: Run Tests
+        run: |
+          nox -s test-${{ matrix.python-version }}
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v1
+        with:
+          token: 3bb38a90-137e-4efe-9627-ca66de472c13
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          yml: ./codecov.yml
+          fail_ci_if_error: true
+
+  Windows:
+    runs-on: windows-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: Set Up Python 3.7 to run nox
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Set Up Python - ${{ matrix.python-version }}
+        if: matrix.python_version != '3.7'
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies (Windows)
+        run: |
+          # Work around https://github.com/theacodes/nox/issues/250
+          Remove-Item C:\ProgramData\Chocolatey\bin\python2.7.exe
+          py -3.7 -m pip install nox
+      - name: Run Tests
+        run: |
+          nox -s test-${{ matrix.python-version }}
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v1
+        with:
+          token: 3bb38a90-137e-4efe-9627-ca66de472c13
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          yml: ./codecov.yml
+          fail_ci_if_error: true
