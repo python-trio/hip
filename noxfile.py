@@ -29,6 +29,9 @@ def tests_impl(session, extras="socks,secure,brotli"):
     # Print OpenSSL information.
     session.run("python", "-m", "OpenSSL.debug")
 
+    if session.python != "pypy" and session.python != "2.7":
+        session.posargs.extend(["--random-order"])
+
     session.run(
         "pytest",
         "-r",
@@ -43,12 +46,12 @@ def tests_impl(session, extras="socks,secure,brotli"):
     _clean_coverage("coverage.xml")
 
 
-@nox.session(python=["2.7", "3.5", "3.6", "3.7", "3.8", "pypy"])
+@nox.session(python=["2.7", "3.5", "3.6", "3.7", "3.8", "pypy", "pypy3"])
 def test(session):
     tests_impl(session)
 
 
-@nox.session(python=["2", "3"])
+@nox.session(python=["2.7", "3.7"])
 def google_brotli(session):
     # https://pypi.org/project/Brotli/ is the Google version of brotli, so
     # install it separately and don't install our brotli extra (which installs
