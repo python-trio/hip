@@ -4,9 +4,10 @@ from threading import Thread, Event
 
 import pytest
 from tornado import web, ioloop
+import trustme
 
 from dummyserver.handlers import TestingApp
-from dummyserver.server import DEFAULT_CERTS, NO_SAN_CA, NO_SAN_CERTS, run_tornado_app
+from dummyserver.server import DEFAULT_CERTS, run_tornado_app
 
 try:
     import asyncio
@@ -70,6 +71,23 @@ def http_server():
 
 
 @pytest.fixture
-def no_san_server():
-    with run_server_in_thread("https", "localhost", NO_SAN_CA, NO_SAN_CERTS) as cfg:
+def no_san_server(tmp_path_factory):
+    tmpdir = tmp_path_factory.mktemp("certs")
+    ca = trustme.CA()
+    # only common name, no subject alternative names
+    server_cert = ca.issue_cert(common_name=u"localhost")
+
+    ca_cert_path = str(tmpdir / "ca.pem")
+    server_cert_path = str(tmpdir / "server.pem")
+    server_key_path = str(tmpdir / "server.key")
+    ca.cert_pem.write_to_path(ca_cert_path)
+    server_cert.private_key_pem.write_to_path(server_key_path)
+    server_cert.cert_chain_pems[0].write_to_path(server_cert_path)
+
+    with run_server_in_thread(
+        "https",
+        "localhost",
+        ca_cert_path,
+        {"keyfile": server_key_path, "certfile": server_cert_path},
+    ) as cfg:
         yield cfg
