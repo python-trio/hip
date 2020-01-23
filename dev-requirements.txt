@@ -20,7 +20,7 @@ gcp-devrel-py-tools
 # optional dependencies, only intended for use with Python 3.6+
 curio==0.9; python_version >= "3.6"
 trio==0.13.0; python_version >= "3.6"
-git+git://github.com/agronholm/anyio.git#egg=anyio; python_version >= "3.6"
+git+https://github.com/agronholm/anyio.git#egg=anyio; python_version >= "3.6"
 pytest-trio==0.5.2;python_version>="3.6"
 # https://github.com/mhammond/pywin32/issues/1439
 pywin32!=226; python_version >= "3.6" and os_name == 'nt'
