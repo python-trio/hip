@@ -1,3 +1,9 @@
+This software is made available under the terms of *either* of the
+licenses found in LICENSE.APACHE2 or LICENSE.MIT. Contributions to
+Hip are made under the terms of *both* these licenses.
+
+This software contains work from the urllib3 project, used under the following license:
+
 MIT License
 
 Copyright (c) 2008-2019 Andrey Petrov and contributors (see CONTRIBUTORS.txt)
