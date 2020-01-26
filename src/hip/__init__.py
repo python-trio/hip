@@ -1,6 +1,5 @@
-"""
-Hip - Thread-safe connection pooling and re-using.
-"""
+"""Hip: A new Python HTTP client for Everyone"""
+
 from __future__ import absolute_import
 import warnings
 
@@ -20,9 +19,9 @@ from .util.retry import Retry
 import logging
 from logging import NullHandler
 
-__author__ = "Andrey Petrov (andrey.petrov@shazow.net)"
-__license__ = "MIT"
-__version__ = "2.0.dev0+unasync.proof.of.concept.dont.use"
+__author__ = "The Trio Collective"
+__license__ = "MIT -or- Apache-2.0"
+__version__ = "0.1.dev0"
 
 __all__ = [
     "HTTPConnectionPool",
