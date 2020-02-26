@@ -44,7 +44,9 @@ However, we currently do not support SOCKS proxies nor the pyOpenSSL and SecureT
 Sample code
 -----------
 
-Hip is powerful and easy to use::
+Hip is powerful and easy to use:
+
+.. code-block:: python
 
     >>> import hip
     >>> http = hip.PoolManager()
@@ -54,7 +56,9 @@ Hip is powerful and easy to use::
     >>> r.data
     'User-agent: *\nDisallow: /deny\n'
 
-It also supports async/await::
+It also supports async/await:
+
+.. code-block:: python
 
     import hip
     import trio
