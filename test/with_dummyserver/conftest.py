@@ -17,20 +17,12 @@ except ImportError:
 ServerConfig = collections.namedtuple("ServerConfig", ["host", "port", "ca_certs"])
 
 test_all_backends = pytest.mark.parametrize(
-    "backend",
+    "backend, anyio_backend",
     [
-        pytest.param(
-            "trio", id="trio-native", marks=[pytest.mark.anyio(backend="trio")]
-        ),
-        pytest.param(
-            "anyio", id="anyio-trio", marks=[pytest.mark.anyio(backend="trio")]
-        ),
-        pytest.param(
-            "anyio", id="anyio-curio", marks=[pytest.mark.anyio(backend="curio")]
-        ),
-        pytest.param(
-            "anyio", id="anyio-asyncio", marks=[pytest.mark.anyio(backend="asyncio")]
-        ),
+        pytest.param("trio", "trio", id="trio-native"),
+        pytest.param("anyio", "trio", id="anyio-trio"),
+        pytest.param("anyio", "curio", id="anyio-curio"),
+        pytest.param("anyio", "asyncio", id="anyio-asyncio"),
     ],
 )
 
