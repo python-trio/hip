@@ -32,6 +32,26 @@ def tests_impl(session, extras="socks,secure,brotli"):
     if session.python != "pypy" and session.python != "2.7":
         session.posargs.extend(["--random-order"])
 
+    # Only require unasync to run tests
+    import unasync  # please install unasync alongside nox to run tests
+
+    unasync.unasync_files(
+        [
+            "test/with_dummyserver/async/__init__.py",
+            "test/with_dummyserver/async/test_poolmanager.py",
+        ],
+        rules=[
+            unasync.Rule(
+                "test/with_dummyserver/async",
+                "test/with_dummyserver/sync",
+                additional_replacements={
+                    "AsyncPoolManager": "PoolManager",
+                    "test_all_backends": "test_sync_backend",
+                },
+            )
+        ],
+    )
+
     session.run(
         "pytest",
         "-r",

@@ -1,6 +1,7 @@
 # Project-specific generated files
 docs/build/
 src/hip/_sync/
+test/with_dummyserver/sync/
 
 bench/results/
 bench/env/

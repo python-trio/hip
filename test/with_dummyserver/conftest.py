@@ -27,6 +27,9 @@ test_all_backends = pytest.mark.parametrize(
 )
 
 
+test_sync_backend = pytest.mark.parametrize("backend, anyio_backend", [("sync", None)])
+
+
 @contextlib.contextmanager
 def run_server_in_thread(scheme, host, ca_certs, server_certs):
     def _run_server_in_thread():
