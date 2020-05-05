@@ -39,17 +39,10 @@ class TestNormalizeBackend(object):
     def test_async(self):
         assert normalize_backend(Backend("anyio"), async_mode=True) == Backend("anyio")
         assert normalize_backend(Backend("trio"), async_mode=True) == Backend("trio")
-        assert normalize_backend("twisted", async_mode=True) == Backend("twisted")
 
         with pytest.raises(ValueError) as excinfo:
             normalize_backend(Backend("sync"), async_mode=True)
         assert "sync backend needs to be run in sync mode" == str(excinfo.value)
-
-        from twisted.internet import reactor
-
-        assert normalize_backend(
-            Backend("twisted", reactor=reactor), async_mode=True
-        ) == Backend("twisted", reactor=reactor)
 
 
 class TestLoadBackend(object):
@@ -59,9 +52,3 @@ class TestLoadBackend(object):
 
     def test_sync(self):
         load_backend(normalize_backend("sync", async_mode=False))
-
-    @requires_async_pool_manager()
-    def test_async(self):
-        from twisted.internet import reactor
-
-        load_backend(Backend("twisted", reactor=reactor))
