@@ -15,7 +15,7 @@ Hip
 
 .. image:: https://img.shields.io/pypi/v/hip.svg?maxAge=86400
         :alt: PyPI version
-        :target: https://pypi.org/project/hip/
+        :target: https://pypi.org/project/hip
 
 .. image:: https://badges.gitter.im/python-trio/hip.svg
         :alt: Gitter
@@ -76,13 +76,16 @@ Installing
 
 Hip can be installed with `pip <https://pip.pypa.io>`_::
 
-    $ pip install hip
+    $ python -m pip install hip
 
 Alternatively, you can grab the latest source code from `GitHub <https://github.com/python-trio/hip>`_::
 
-    $ git clone git://github.com/python-trio/hip.git
-    $ python setup.py install
+    $ python -m pip install git+https://github.com/python-trio/hip
 
+    - OR -
+
+    $ git clone git://github.com/python-trio/hip.git
+    $ cd hip && python setup.py install
 
 Documentation
 -------------
