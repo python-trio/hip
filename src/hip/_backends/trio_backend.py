@@ -1,6 +1,7 @@
 import trio
 
 from ._common import is_readable, LoopAbort
+from .async_backend import AsyncBackend, AsyncSocket
 
 BUFSIZE = 65536
 
@@ -8,7 +9,7 @@ BUFSIZE = 65536
 # XX support connect_timeout and read_timeout
 
 
-class TrioBackend:
+class TrioBackend(AsyncBackend):
     async def connect(
         self, host, port, connect_timeout, source_address=None, socket_options=None
     ):
@@ -33,23 +34,24 @@ class TrioBackend:
 # True so the connection won't be reused.
 
 
-class TrioSocket:
+class TrioSocket(AsyncSocket):
     def __init__(self, stream):
-        self._stream = stream
+        self._stream: trio.SSLStream = stream
 
     async def start_tls(self, server_hostname, ssl_context):
-        wrapped = trio.ssl.SSLStream(
+        wrapped = trio.SSLStream(
             self._stream,
             ssl_context,
             server_hostname=server_hostname,
             https_compatible=True,
         )
+        await wrapped.do_handshake()
         return TrioSocket(wrapped)
 
     def getpeercert(self, binary_form=False):
         return self._stream.getpeercert(binary_form=binary_form)
 
-    async def receive_some(self):
+    async def receive_some(self, read_timeout):
         return await self._stream.receive_some(BUFSIZE)
 
     async def send_and_receive_for_a_while(

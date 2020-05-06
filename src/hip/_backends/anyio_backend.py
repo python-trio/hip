@@ -3,6 +3,7 @@ from ssl import SSLContext
 import anyio
 
 from ._common import is_readable, LoopAbort
+from .async_backend import AsyncBackend, AsyncSocket
 
 BUFSIZE = 65536
 
@@ -10,7 +11,7 @@ BUFSIZE = 65536
 # XX support connect_timeout and read_timeout
 
 
-class AnyIOBackend:
+class AnyIOBackend(AsyncBackend):
     async def connect(
         self, host, port, connect_timeout, source_address=None, socket_options=None
     ):
@@ -30,12 +31,14 @@ class AnyIOBackend:
 # True so the connection won't be reused.
 
 
-class AnyIOSocket:
+class AnyIOSocket(AsyncSocket):
     def __init__(self, stream: anyio.SocketStream):
         self._stream = stream
 
     async def start_tls(self, server_hostname, ssl_context: SSLContext):
-        await self._stream.start_tls(ssl_context)
+        await self._stream.start_tls(
+            ssl_context, suppress_ragged_eofs=True, server_hostname=server_hostname
+        )
         return self
 
     def getpeercert(self, binary_form=False):
