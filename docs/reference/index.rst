@@ -10,7 +10,6 @@ Subpackages
 
 .. toctree::
 
-    hip.contrib
     hip.util
 
 Submodules

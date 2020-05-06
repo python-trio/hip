@@ -1,8 +1,8 @@
-urllib3.util package
+hip.util package
 ====================
 
 Useful methods for working with :mod:`httplib`, completely decoupled from
-code specific to **urllib3**.
+code specific to **Hip**.
 
 At the very core, just like its predecessors, :mod:`hip` is built on top of
 :mod:`httplib` -- the lowest level HTTP library included in the Python
@@ -12,40 +12,40 @@ To aid the limited functionality of the :mod:`httplib` module, :mod:`hip`
 provides various helper methods which are used with the higher level components
 but can also be used independently.
 
-urllib3.util.connection module
-------------------------------
+hip.util.connection module
+--------------------------
 
 .. automodule:: hip.util.connection
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.util.request module
----------------------------
+hip.util.request module
+-----------------------
 
 .. automodule:: hip.util.request
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.util.retry module
--------------------------
+hip.util.retry module
+---------------------
 
 .. automodule:: hip.util.retry
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.util.timeout module
----------------------------
+hip.util.timeout module
+-----------------------
 
 .. automodule:: hip.util.timeout
     :members:
     :undoc-members:
     :show-inheritance:
 
-urllib3.util.url module
------------------------
+hip.util.url module
+-------------------
 
 .. automodule:: hip.util.url
     :members:

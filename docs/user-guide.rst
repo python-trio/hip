@@ -3,18 +3,18 @@ User Guide
 
 .. currentmodule:: hip
 
-Making requests
----------------
+Making your first HTTP request
+------------------------------
 
-First things first, import the urllib3 module::
+First things first, import the hip module::
 
-    >>> import urllib3
+    >>> import hip
 
 You'll need a :class:`~poolmanager.PoolManager` instance to make requests.
 This object handles all of the details of connection pooling and thread safety
 so that you don't have to::
 
-    >>> http = urllib3.PoolManager()
+    >>> http = hip.PoolManager()
 
 To make a request use :meth:`~poolmanager.PoolManager.request`::
 
@@ -77,8 +77,8 @@ to a byte string representing the response content::
 .. note:: For larger responses, it's sometimes better to :ref:`stream <stream>`
     the response.
 
-Using io Wrappers with Response content
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using ``io`` Wrappers with Response content
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Sometimes you want to use :class:`io.TextIOWrapper` or similar objects like a CSV reader
 directly with :class:`~response.HTTPResponse` data. Making these two interfaces play nice
@@ -93,7 +93,7 @@ to ``False``. By default HTTP responses are closed after reading all bytes, this
 
 .. _request_data:
 
-Request data
+Request Data
 ------------
 
 Headers
@@ -110,7 +110,7 @@ You can specify headers as a dictionary in the ``headers`` argument in :meth:`~p
     >>> json.loads(r.data.decode('utf-8'))['headers']
     {'X-Something': 'value', ...}
 
-Query parameters
+Query Parameters
 ~~~~~~~~~~~~~~~~
 
 For ``GET``, ``HEAD``, and ``DELETE`` requests, you can simply pass the
@@ -137,10 +137,10 @@ in the URL::
 
 .. _form_data:
 
-Form data
+Form Data
 ~~~~~~~~~
 
-For ``PUT`` and ``POST`` requests, urllib3 will automatically form-encode the
+For ``PUT`` and ``POST`` requests, hip will automatically form-encode the
 dictionary in the ``fields`` argument provided to
 :meth:`~poolmanager.PoolManager.request`::
 
@@ -169,7 +169,7 @@ argument and setting the ``Content-Type`` header when calling
     >>> json.loads(r.data.decode('utf-8'))['json']
     {'attribute': 'value'}
 
-Files & binary data
+Files & Binary Data
 ~~~~~~~~~~~~~~~~~~~
 
 For uploading files using ``multipart/form-data`` encoding you can use the same
@@ -213,27 +213,23 @@ recommended to set the ``Content-Type`` header::
 
 .. _ssl:
 
-Certificate verification
+Certificate Verification
 ------------------------
-
- .. note:: *New in version 1.25*
-
-    HTTPS connections are now verified by default (``cert_reqs = 'CERT_REQUIRED'``).
 
 While you can disable certification verification, it is highly recommend to leave it on.
 
-Unless otherwise specified urllib3 will try to load the default system certificate stores.
+Unless otherwise specified hip will try to load the default system certificate stores.
 The most reliable cross-platform method is to use the `certifi <https://certifi.io/>`_
 package which provides Mozilla's root certificate bundle::
 
-    pip install certifi
+    python -m pip install certifi
 
 Once you have certificates, you can create a :class:`~poolmanager.PoolManager`
 that verifies certificates when making requests::
 
     >>> import certifi
-    >>> import urllib3
-    >>> http = urllib3.PoolManager(
+    >>> import hip
+    >>> http = hip.PoolManager(
     ...     cert_reqs='CERT_REQUIRED',
     ...     ca_certs=certifi.where())
 
@@ -243,7 +239,7 @@ verification and will raise :class:`~exceptions.SSLError` if verification fails:
     >>> http.request('GET', 'https://google.com')
     (No exception)
     >>> http.request('GET', 'https://expired.badssl.com')
-    urllib3.exceptions.SSLError ...
+    hip.exceptions.SSLError ...
 
 .. note:: You can use OS-provided certificates if desired. Just specify the full
     path to the certificate bundle as the ``ca_certs`` argument instead of
@@ -251,7 +247,7 @@ verification and will raise :class:`~exceptions.SSLError` if verification fails:
     at ``/etc/ssl/certs/ca-certificates.crt``. Other operating systems can
     be `difficult <https://stackoverflow.com/questions/10095676/openssl-reasonable-default-for-trusted-ca-certificates>`_.
 
-Using timeouts
+Using Timeouts
 --------------
 
 Timeouts allow you to control how long (in seconds) requests are allowed to run
@@ -260,7 +256,7 @@ to :meth:`~poolmanager.PoolManager.request`::
 
     >>> http.request(
     ...     'GET', 'http://httpbin.org/delay/3', timeout=4.0)
-    <urllib3.response.HTTPResponse>
+    <hip.response.HTTPResponse>
     >>> http.request(
     ...     'GET', 'http://httpbin.org/delay/3', timeout=2.5)
     MaxRetryError caused by ReadTimeoutError
@@ -271,36 +267,36 @@ instance which lets you specify separate connect and read timeouts::
     >>> http.request(
     ...     'GET',
     ...     'http://httpbin.org/delay/3',
-    ...     timeout=urllib3.Timeout(connect=1.0))
-    <urllib3.response.HTTPResponse>
+    ...     timeout=hip.Timeout(connect=1.0))
+    <hip.response.HTTPResponse>
     >>> http.request(
     ...     'GET',
     ...     'http://httpbin.org/delay/3',
-    ...     timeout=urllib3.Timeout(connect=1.0, read=2.0))
+    ...     timeout=hip.Timeout(connect=1.0, read=2.0))
     MaxRetryError caused by ReadTimeoutError
 
 
 If you want all requests to be subject to the same timeout, you can specify
-the timeout at the :class:`~urllib3.poolmanager.PoolManager` level::
+the timeout at the :class:`~hip.poolmanager.PoolManager` level::
 
-    >>> http = urllib3.PoolManager(timeout=3.0)
-    >>> http = urllib3.PoolManager(
-    ...     timeout=urllib3.Timeout(connect=1.0, read=2.0))
+    >>> http = hip.PoolManager(timeout=3.0)
+    >>> http = hip.PoolManager(
+    ...     timeout=hip.Timeout(connect=1.0, read=2.0))
 
 You still override this pool-level timeout by specifying ``timeout`` to
 :meth:`~poolmanager.PoolManager.request`.
 
-Retrying requests
+Retrying Requests
 -----------------
 
-urllib3 can automatically retry idempotent requests. This same mechanism also
+hip can automatically retry idempotent requests. This same mechanism also
 handles redirects. You can control the retries using the ``retries`` parameter
-to :meth:`~poolmanager.PoolManager.request`. By default, urllib3 will retry
+to :meth:`~poolmanager.PoolManager.request`. By default, hip will retry
 requests 3 times and follow up to 3 redirects.
 
 To change the number of retries just specify an integer::
 
-    >>> http.requests('GET', 'http://httpbin.org/ip', retries=10)
+    >>> http.request('GET', 'http://httpbin.org/ip', retries=10)
 
 To disable all retry and redirect logic specify ``retries=False``::
 
@@ -327,7 +323,7 @@ For example, to do a total of 3 retries, but limit to only 2 redirects::
     >>> http.request(
     ...     'GET',
     ...     'http://httpbin.org/redirect/3',
-    ...     retries=urllib3.Retry(3, redirect=2))
+    ...     retries=hip.Retry(3, redirect=2))
     MaxRetryError
 
 You can also disable exceptions for too many redirects and just return the
@@ -336,17 +332,17 @@ You can also disable exceptions for too many redirects and just return the
     >>> r = http.request(
     ...     'GET',
     ...     'http://httpbin.org/redirect/3',
-    ...     retries=urllib3.Retry(
+    ...     retries=hip.Retry(
     ...         redirect=2, raise_on_redirect=False))
     >>> r.status
     302
 
 If you want all requests to be subject to the same retry policy, you can
-specify the retry at the :class:`~urllib3.poolmanager.PoolManager` level::
+specify the retry at the :class:`~hip.poolmanager.PoolManager` level::
 
-    >>> http = urllib3.PoolManager(retries=False)
-    >>> http = urllib3.PoolManager(
-    ...     retries=urllib3.Retry(5, redirect=2))
+    >>> http = hip.PoolManager(retries=False)
+    >>> http = hip.PoolManager(
+    ...     retries=hip.Retry(5, redirect=2))
 
 You still override this pool-level retry policy by specifying ``retries`` to
 :meth:`~poolmanager.PoolManager.request`.
@@ -354,20 +350,20 @@ You still override this pool-level retry policy by specifying ``retries`` to
 Errors & Exceptions
 -------------------
 
-urllib3 wraps lower-level exceptions, for example::
+hip wraps lower-level exceptions, for example::
 
     >>> try:
     ...     http.request('GET', 'nx.example.com', retries=False)
-    >>> except urllib3.exceptions.NewConnectionError:
+    >>> except hip.exceptions.NewConnectionError:
     ...     print('Connection failed.')
 
-See :mod:`~urllib3.exceptions` for the full list of all exceptions.
+See :mod:`~hip.exceptions` for the full list of all exceptions.
 
 Logging
 -------
 
-If you are using the standard library :mod:`logging` module urllib3 will
+If you are using the standard library :mod:`logging` module hip will
 emit several logs. In some cases this can be undesirable. You can use the
-standard logger interface to change the log level for urllib3's logger::
+standard logger interface to change the log level for hip's logger::
 
-    >>> logging.getLogger("urllib3").setLevel(logging.WARNING)
+    >>> logging.getLogger("hip").setLevel(logging.WARNING)
