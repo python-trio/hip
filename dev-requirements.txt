@@ -22,7 +22,3 @@ curio==0.9; python_version >= "3.6"
 trio==0.13.0; python_version >= "3.6"
 anyio==1.3.0; python_version >= "3.6"
 pytest-trio==0.5.2;python_version>="3.6"
-# https://github.com/mhammond/pywin32/issues/1439
-pywin32!=226; python_version >= "3.6" and os_name == 'nt'
-twisted[tls]==19.2.0; python_version >= "3.6" and os_name != 'nt'
-twisted[tls,windows_platform]==19.2.0; python_version >= "3.6" and os_name == 'nt'

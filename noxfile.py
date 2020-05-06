@@ -16,7 +16,7 @@ def _clean_coverage(coverage_path):
     input_xml.write(coverage_path, xml_declaration=True)
 
 
-def tests_impl(session, extras="socks,secure,brotli"):
+def tests_impl(session, extras="socks,brotli"):
     # Install deps and the package itself.
     session.install("-r", "dev-requirements.txt")
     session.install(".[{extras}]".format(extras=extras))
@@ -26,8 +26,6 @@ def tests_impl(session, extras="socks,secure,brotli"):
     # Print the Python version and bytesize.
     session.run("python", "--version")
     session.run("python", "-c", "import struct; print(struct.calcsize('P') * 8)")
-    # Print OpenSSL information.
-    session.run("python", "-m", "OpenSSL.debug")
 
     if session.python != "pypy" and session.python != "2.7":
         session.posargs.extend(["--random-order"])
@@ -77,7 +75,7 @@ def google_brotli(session):
     # install it separately and don't install our brotli extra (which installs
     # brotlipy).
     session.install("brotli")
-    tests_impl(session, extras="socks,secure")
+    tests_impl(session, extras="socks")
 
 
 @nox.session()
@@ -103,7 +101,7 @@ def lint(session):
 @nox.session
 def docs(session):
     session.install("-r", "docs/requirements.txt")
-    session.install(".[socks,secure,brotli]")
+    session.install(".[socks,brotli]")
 
     session.chdir("docs")
     if os.path.exists("_build"):

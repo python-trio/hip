@@ -224,13 +224,6 @@ package which provides Mozilla's root certificate bundle::
 
     python -m pip install certifi
 
-You can also install certifi along with hip by using the ``secure``
-extra::
-
-    python -m pip install hip[secure]
-
-.. warning:: If you're using Python 2 you may need additional packages. See the :ref:`section below <ssl_py2>` for more details.
-
 Once you have certificates, you can create a :class:`~poolmanager.PoolManager`
 that verifies certificates when making requests::
 
@@ -253,54 +246,6 @@ verification and will raise :class:`~exceptions.SSLError` if verification fails:
     ``certifi.where()``. For example, most Linux systems store the certificates
     at ``/etc/ssl/certs/ca-certificates.crt``. Other operating systems can
     be `difficult <https://stackoverflow.com/questions/10095676/openssl-reasonable-default-for-trusted-ca-certificates>`_.
-
-.. _ssl_py2:
-
-Certificate verification in Python 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Older versions of Python 2 are built with an :mod:`ssl` module that lacks
-:ref:`SNI support <sni_warning>` and can lag behind security updates. For these reasons it's recommended to use
-`pyOpenSSL <https://pyopenssl.readthedocs.io/en/latest/>`_.
-
-If you install hip with the ``secure`` extra, all required packages for
-certificate verification on Python 2 will be installed::
-
-    python -m pip install hip[secure]
-
-If you want to install the packages manually, you will need ``pyOpenSSL``,
-``cryptography``, ``idna``, and ``certifi``.
-
-.. note:: If you are not using macOS or Windows, note that `cryptography
-    <https://cryptography.io/en/latest/>`_ requires additional system packages
-    to compile. See `building cryptography on Linux
-    <https://cryptography.io/en/latest/installation/#building-cryptography-on-linux>`_
-    for the list of packages required.
-
-Once installed, you can tell hip to use pyOpenSSL by using :mod:`hip.contrib.pyopenssl`::
-
-    >>> import hip.contrib.pyopenssl
-    >>> hip.contrib.pyopenssl.inject_into_hip()
-
-Finally, you can create a :class:`~poolmanager.PoolManager` that verifies
-certificates when performing requests::
-
-    >>> import certifi
-    >>> import hip
-    >>> http = hip.PoolManager(
-    ...     cert_reqs='CERT_REQUIRED',
-    ...     ca_certs=certifi.where())
-
-If you do not wish to use pyOpenSSL, you can simply omit the call to
-:func:`hip.contrib.pyopenssl.inject_into_hip`. hip will fall back
-to the standard-library :mod:`ssl` module. You may experience
-:ref:`several warnings <ssl_warnings>` when doing this.
-
-.. warning:: If you do not use pyOpenSSL, Python must be compiled with ssl
-    support for certificate verification to work. It is uncommon, but it is
-    possible to compile Python without SSL support. See this
-    `Stackoverflow thread <https://stackoverflow.com/questions/5128845/importerror-no-module-named-ssl>`_
-    for more details.
 
 Using Timeouts
 --------------

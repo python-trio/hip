@@ -29,12 +29,6 @@ def load_trio_backend(kwargs):
     return TrioBackend(**kwargs)
 
 
-def load_twisted_backend(kwargs):
-    from .twisted_backend import TwistedBackend
-
-    return TwistedBackend(**kwargs)
-
-
 def backend_directory():
     """
     We defer any heavy duty imports until the last minute.
@@ -43,7 +37,6 @@ def backend_directory():
         Loader(name="sync", loader=load_sync_backend, is_async=False),
         Loader(name="trio", loader=load_trio_backend, is_async=True),
         Loader(name="anyio", loader=load_anyio_backend, is_async=True),
-        Loader(name="twisted", loader=load_twisted_backend, is_async=True),
     ]
     return {loader.name: loader for loader in loaders}
 

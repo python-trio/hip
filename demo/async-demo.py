@@ -25,10 +25,3 @@ loop.close()
 print("\n--- Curio (via AnyIO) ---")
 import curio
 curio.run(main)
-
-print("\n--- Twisted ---")
-from twisted.internet.task import react
-from twisted.internet.defer import ensureDeferred
-def twisted_main(reactor):
-    return ensureDeferred(main(Backend("twisted", reactor=reactor)))
-react(twisted_main)

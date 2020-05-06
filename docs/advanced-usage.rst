@@ -217,8 +217,7 @@ be resolved in different ways.
     This happens on Python 2 platforms that have an outdated :mod:`ssl` module.
     These older :mod:`ssl` modules can cause some insecure requests to succeed
     where they should fail and secure requests to fail where they should
-    succeed. Follow the :ref:`pyOpenSSL <ssl_py2>` guide to resolve this
-    warning.
+    succeed.
 
 .. _sni_warning:
 
@@ -226,8 +225,7 @@ be resolved in different ways.
     This happens on Python 2 versions older than 2.7.9. These older versions
     lack `SNI <https://en.wikipedia.org/wiki/Server_Name_Indication>`_ support.
     This can cause servers to present a certificate that the client thinks is
-    invalid. Follow the :ref:`pyOpenSSL <ssl_py2>` guide to resolve this
-    warning.
+    invalid.
 
 .. _disable_ssl_warnings:
 
