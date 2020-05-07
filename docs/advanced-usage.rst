@@ -127,7 +127,7 @@ SOCKS5 proxies. In order to use SOCKS proxies you will need to install
 `PySocks <https://pypi.org/project/PySocks/>`_ or install hip with the
 ``socks`` extra::
 
-    pip install hip[socks]
+    python -m pip install hip[socks]
 
 Once PySocks is installed, you can use
 :class:`~contrib.socks.SOCKSProxyManager`::

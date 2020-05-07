@@ -1,5 +1,5 @@
-Hip
-===
+Hip: A new Python HTTP client for Everyone
+==========================================
 
 .. toctree::
    :hidden:
