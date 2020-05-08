@@ -13,12 +13,12 @@ except ImportError:
 
 import h11
 
-from .._collections import HTTPHeaderDict
-from ..exceptions import ProtocolError, DecodeError, ReadTimeoutError
-from hip.packages.six import string_types as basestring
-from ..util.ssl_ import BaseSSLError
+from ._collections import HTTPHeaderDict
+from .exceptions import ProtocolError, DecodeError, ReadTimeoutError
+from .packages.six import string_types as basestring
+from .util.ssl_ import BaseSSLError
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("hip.response")
 
 
 class DeflateDecoder(object):

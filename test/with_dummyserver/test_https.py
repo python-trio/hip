@@ -43,7 +43,7 @@ from test import (
     LONG_TIMEOUT,
 )
 from hip import HTTPSConnectionPool
-from hip._sync.connection import RECENT_DATE
+from hip.connection import RECENT_DATE
 from hip.exceptions import (
     SSLError,
     ConnectTimeoutError,
@@ -580,7 +580,7 @@ class TestHTTPS(HTTPSDummyServerTestCase):
 
     @onlyPy279OrNewer
     def test_ssl_wrong_system_time(self):
-        with mock.patch("hip._sync.connection.datetime") as mock_date:
+        with mock.patch("hip.connection.datetime") as mock_date:
             mock_date.date.today.return_value = datetime.date(1970, 1, 1)
 
             w = self._request_without_resource_warnings("GET", "/")

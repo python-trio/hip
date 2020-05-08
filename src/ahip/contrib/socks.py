@@ -54,7 +54,7 @@ except ImportError:
 
 from socket import error as SocketError, timeout as SocketTimeout
 
-from .._sync.connection import HTTP1Connection
+from ..connection import HTTP1Connection
 from ..connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 from ..exceptions import ConnectTimeoutError, NewConnectionError
 from ..poolmanager import PoolManager

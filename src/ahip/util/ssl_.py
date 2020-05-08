@@ -26,7 +26,7 @@ IS_SECURETRANSPORT = False
 HASHFUNC_MAP = {32: md5, 40: sha1, 64: sha256}
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("hip.util.ssl_")
 
 
 def _const_compare_digest_backport(a, b):

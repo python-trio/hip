@@ -62,4 +62,4 @@ stages:
 
   # Deploy on any tags
   - name: deploy
-    if: tag IS present AND tag =~ /^(\d+\.\d+(?:.\d+)?)$/ AND repo = hip/hip
+    if: tag IS present AND tag =~ /^(\d+\.\d+(?:.\d+)?)$/ AND repo = python-trio/hip

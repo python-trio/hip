@@ -16,7 +16,7 @@ import h11
 
 from hip.base import Request
 from hip._backends.sync_backend import SyncSocket
-from hip._sync.connection import HTTP1Connection
+from hip.connection import HTTP1Connection
 
 
 # Objects and globals for handling scenarios.

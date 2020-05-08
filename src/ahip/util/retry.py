@@ -17,7 +17,7 @@ from ..exceptions import (
 from ..packages import six
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("hip.util.retry")
 
 
 # Data structure for representing the metadata of requests that result in a retry.

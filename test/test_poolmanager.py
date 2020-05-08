@@ -3,7 +3,7 @@ import socket
 import pytest
 
 from hip.poolmanager import PoolManager
-from hip._sync.poolmanager import key_fn_by_scheme, PoolKey
+from hip.poolmanager import key_fn_by_scheme, PoolKey
 from hip import connection_from_url
 from hip.exceptions import ClosedPoolError, LocationValueError
 from hip.util import retry, timeout, ssl_

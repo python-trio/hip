@@ -10,8 +10,8 @@ import socket
 import h11
 
 
-from ..base import Request, DEFAULT_PORTS
-from ..exceptions import (
+from .base import Request, DEFAULT_PORTS
+from .exceptions import (
     ClosedPoolError,
     ProtocolError,
     EmptyPoolError,
@@ -24,32 +24,32 @@ from ..exceptions import (
     InsecureRequestWarning,
     NewConnectionError,
 )
-from hip.packages.ssl_match_hostname import CertificateError
-from hip.packages import six
-from hip.packages.six.moves import queue
+from .packages.ssl_match_hostname import CertificateError
+from .packages import six
+from .packages.six.moves import queue
 from .request import RequestMethods
 from .response import HTTPResponse
 from .connection import HTTP1Connection
 
-from ..util.connection import is_connection_dropped
-from ..util.request import set_file_position
-from ..util.retry import Retry
-from ..util.ssl_ import (
+from .util.connection import is_connection_dropped
+from .util.request import set_file_position
+from .util.retry import Retry
+from .util.ssl_ import (
     create_ssl_context,
     merge_context_settings,
     resolve_ssl_version,
     resolve_cert_reqs,
     BaseSSLError,
 )
-from ..util.timeout import Timeout
-from ..util.url import (
+from .util.timeout import Timeout
+from .util.url import (
     get_host,
     parse_url,
     Url,
     _normalize_host as normalize_host,
     _encode_target,
 )
-from ..util.queue import LifoQueue
+from .util.queue import LifoQueue
 
 try:
     import ssl
@@ -59,7 +59,7 @@ except ImportError:
 
 xrange = six.moves.xrange
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("hip.connectionpool")
 
 _Default = object()
 

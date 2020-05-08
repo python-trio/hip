@@ -3,22 +3,22 @@ import collections
 import functools
 import logging
 
-from .._collections import RecentlyUsedContainer
-from ..base import DEFAULT_PORTS
+from ._collections import RecentlyUsedContainer
+from .base import DEFAULT_PORTS
 from .connectionpool import HTTPConnectionPool, HTTPSConnectionPool
-from ..exceptions import LocationValueError, MaxRetryError, ProxySchemeUnknown
-from ..packages import six
-from ..packages.six.moves.urllib.parse import urljoin
+from .exceptions import LocationValueError, MaxRetryError, ProxySchemeUnknown
+from .packages import six
+from .packages.six.moves.urllib.parse import urljoin
 from .request import RequestMethods
-from ..util.url import parse_url
-from ..util.request import set_file_position
-from ..util.retry import Retry
+from .util.url import parse_url
+from .util.request import set_file_position
+from .util.retry import Retry
 
 
 __all__ = ["PoolManager", "ProxyManager", "proxy_from_url"]
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("hip.poolmanager")
 
 SSL_KEYWORDS = (
     "key_file",

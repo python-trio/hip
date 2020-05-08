@@ -9,7 +9,7 @@ from hip.connectionpool import (
     HTTPConnectionPool,
     HTTPSConnectionPool,
 )
-from hip._sync.connection import HTTP1Connection
+from hip.connection import HTTP1Connection
 from hip.response import HTTPResponse
 from hip.util.timeout import Timeout
 from hip.packages.six.moves.queue import Empty

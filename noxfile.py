@@ -43,7 +43,7 @@ def tests_impl(session, extras="socks,brotli"):
                 "test/with_dummyserver/async",
                 "test/with_dummyserver/sync",
                 additional_replacements={
-                    "AsyncPoolManager": "PoolManager",
+                    "ahip": "hip",
                     "test_all_backends": "test_sync_backend",
                 },
             )

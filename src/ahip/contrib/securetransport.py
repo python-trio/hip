@@ -19,7 +19,7 @@ contrib module. So...here we are.
 
 To use this module, simply import and inject it::
 
-    import hp.contrib.securetransport
+    import hip.contrib.securetransport
     hip.contrib.securetransport.inject_into_hip()
 
 Happy TLSing!

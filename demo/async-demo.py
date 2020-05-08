@@ -1,12 +1,11 @@
 # This should work on python 3.6+
 
-import hip
-from hip.backends import Backend
+import ahip
 
 URL = "http://httpbin.org/uuid"
 
 async def main(backend=None):
-    with hip.AsyncPoolManager(backend=backend) as http:
+    with ahip.PoolManager(backend=backend) as http:
         print("URL:", URL)
         r = await http.request("GET", URL, preload_content=False)
         print("Status:", r.status)

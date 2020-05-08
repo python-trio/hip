@@ -5,7 +5,7 @@ import h11
 import pytest
 
 from hip.base import Request
-from hip._sync.connection import _request_bytes_iterable, RECENT_DATE
+from hip.connection import _request_bytes_iterable, RECENT_DATE
 from hip.util.ssl_ import CertificateError, match_hostname
 
 

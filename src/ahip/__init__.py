@@ -40,32 +40,8 @@ __all__ = [
     "proxy_from_url",
 ]
 
-# For now we only support async on 3.6, because we use async generators
-import sys
 
-if sys.version_info >= (3, 6):
-    from hip._async.connectionpool import (  # NOQA
-        HTTPConnectionPool as AsyncHTTPConnectionPool,
-        HTTPSConnectionPool as AsyncHTTPSConnectionPool,
-    )
-    from hip._async.poolmanager import (  # NOQA
-        PoolManager as AsyncPoolManager,
-        ProxyManager as AsyncProxyManager,
-    )
-    from hip._async.response import HTTPResponse as AsyncHTTPResponse  # NOQA
-
-    __all__.extend(
-        (
-            "AsyncHTTPConnectionPool",
-            "AsyncHTTPSConnectionPool",
-            "AsyncPoolManager",
-            "AsyncProxyManager",
-            "AsyncHTTPResponse",
-        )
-    )
-
-
-logging.getLogger(__name__).addHandler(NullHandler())
+logging.getLogger("hip").addHandler(NullHandler())
 
 
 def add_stderr_logger(level=logging.DEBUG):
@@ -77,12 +53,12 @@ def add_stderr_logger(level=logging.DEBUG):
     """
     # This method needs to be in this __init__.py to get the __name__ correct
     # even if Hip is vendored within another package.
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("hip")
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
     logger.addHandler(handler)
     logger.setLevel(level)
-    logger.debug("Added a stderr logging handler to logger: %s", __name__)
+    logger.debug("Added a stderr logging handler to logger: %s", "hip")
     return handler
 
 

@@ -22,8 +22,8 @@ import warnings
 
 import h11
 
-from ..base import Request, Response
-from ..exceptions import (
+from .base import Request, Response
+from .exceptions import (
     ConnectTimeoutError,
     NewConnectionError,
     SubjectAltNameWarning,
@@ -33,10 +33,10 @@ from ..exceptions import (
     InvalidBodyError,
     ProtocolError,
 )
-from hip.packages import six
-from ..util import ssl_ as ssl_util
-from .._backends._common import LoopAbort
-from .._backends._loader import load_backend, normalize_backend
+from .packages import six
+from .util import ssl_ as ssl_util
+from ._backends._common import LoopAbort
+from ._backends._loader import load_backend, normalize_backend
 
 try:
     import ssl
