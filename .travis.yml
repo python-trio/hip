@@ -1,6 +1,5 @@
 language: python
-sudo: false
-stage: test
+os: linux
 dist: xenial
 
 before_install:
@@ -17,7 +16,7 @@ script:
 
 cache:
   directories:
-    - ${HOME}/.cache
+  - ${HOME}/.cache
 
 notifications:
   email: false
@@ -29,7 +28,7 @@ env:
     - PYPI_USERNAME=hip
     # PYPI_PASSWORD is set in Travis control panel.
 
-matrix:
+jobs:
   include:
     # Unit tests
     - python: 2.7
