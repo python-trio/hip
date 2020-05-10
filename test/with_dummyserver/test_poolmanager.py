@@ -1,4 +1,3 @@
-import io
 import json
 import time
 
@@ -8,7 +7,7 @@ from dummyserver.server import HAS_IPV6
 from dummyserver.testcase import HTTPDummyServerTestCase, IPv6HTTPDummyServerTestCase
 from hip.base import DEFAULT_PORTS
 from hip.poolmanager import PoolManager
-from hip.exceptions import MaxRetryError, NewConnectionError, UnrewindableBodyError
+from hip.exceptions import MaxRetryError, NewConnectionError
 from hip.util.retry import Retry, RequestHistory
 
 from test import LONG_TIMEOUT
@@ -254,6 +253,25 @@ class TestPoolManager(HTTPDummyServerTestCase):
             )
 
             assert r.status == 500
+
+    @pytest.mark.parametrize(
+        ["target", "expected_target"],
+        [
+            ("/echo_uri?q=1#fragment", b"/echo_uri?q=1"),
+            ("/echo_uri?#", b"/echo_uri?"),
+            ("/echo_uri#?", b"/echo_uri"),
+            ("/echo_uri#?#", b"/echo_uri"),
+            ("/echo_uri??#", b"/echo_uri??"),
+            ("/echo_uri?%3f#", b"/echo_uri?%3F"),
+            ("/echo_uri?%3F#", b"/echo_uri?%3F"),
+            ("/echo_uri?[]", b"/echo_uri?%5B%5D"),
+        ],
+    )
+    def test_encode_http_target(self, target, expected_target):
+        with PoolManager() as http:
+            url = "http://%s:%d%s" % (self.host, self.port, target)
+            r = http.request("GET", url)
+            assert r.data == expected_target
 
     def test_missing_port(self):
         # Can a URL that lacks an explicit port like ':80' succeed, or
@@ -542,26 +560,6 @@ class TestRetry(HTTPDummyServerTestCase):
             ]
             assert actual == expected
 
-    def test_redirect_put_file(self):
-        """PUT with file object should work with a redirection response"""
-        retry = Retry(total=3, status_forcelist=[418])
-        # httplib reads in 8k chunks; use a larger content length
-        content_length = 65535
-        data = b"A" * content_length
-        uploaded_file = io.BytesIO(data)
-        headers = {
-            "test-name": "test_redirect_put_file",
-            "Content-Length": str(content_length),
-        }
-        url = "%s/redirect?target=/echo&status=307" % self.base_url
-
-        with PoolManager() as http:
-            resp = http.urlopen(
-                "PUT", url, headers=headers, retries=retry, body=uploaded_file
-            )
-            assert resp.status == 200
-            assert resp.data == data
-
 
 class TestRetryAfter(HTTPDummyServerTestCase):
     @classmethod
@@ -637,73 +635,6 @@ class TestRetryAfter(HTTPDummyServerTestCase):
             delta = time.time() - t
             assert r.status == 200
             assert delta < 1
-
-
-class TestFileBodiesOnRetryOrRedirect(HTTPDummyServerTestCase):
-    def setup_class(self):
-        super(TestFileBodiesOnRetryOrRedirect, self).setup_class()
-        self.base_url = "http://%s:%d" % (self.host, self.port)
-        self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
-
-    def test_retries_put_filehandle(self):
-        """HTTP PUT retry with a file-like object should not timeout"""
-        retry = Retry(total=3, status_forcelist=[418])
-        # httplib reads in 8k chunks; use a larger content length
-        content_length = 65535
-        data = b"A" * content_length
-        uploaded_file = io.BytesIO(data)
-        headers = {
-            "test-name": "test_retries_put_filehandle",
-            "Content-Length": str(content_length),
-        }
-
-        with PoolManager() as http:
-            resp = http.urlopen(
-                "PUT",
-                "%s/successful_retry" % self.base_url,
-                headers=headers,
-                retries=retry,
-                body=uploaded_file,
-                redirect=False,
-            )
-            assert resp.status == 200
-
-    def test_redirect_with_failed_tell(self):
-        """Abort request if failed to get a position from tell()"""
-
-        class BadTellObject(io.BytesIO):
-            def tell(self):
-                raise IOError
-
-        body = BadTellObject(b"the data")
-        url = "%s/redirect?target=/successful_retry" % self.base_url
-        # httplib uses fileno if Content-Length isn't supplied,
-        # which is unsupported by BytesIO.
-        headers = {"Content-Length": "8"}
-
-        with PoolManager() as http:
-            with pytest.raises(UnrewindableBodyError) as e:
-                http.urlopen("PUT", url, headers=headers, body=body)
-            assert "Unable to record file position for" in str(e.value)
-
-    @pytest.mark.parametrize(
-        ["target", "expected_target"],
-        [
-            ("/echo_uri?q=1#fragment", b"/echo_uri?q=1"),
-            ("/echo_uri?#", b"/echo_uri?"),
-            ("/echo_uri#?", b"/echo_uri"),
-            ("/echo_uri#?#", b"/echo_uri"),
-            ("/echo_uri??#", b"/echo_uri??"),
-            ("/echo_uri?%3f#", b"/echo_uri?%3F"),
-            ("/echo_uri?%3F#", b"/echo_uri?%3F"),
-            ("/echo_uri?[]", b"/echo_uri?%5B%5D"),
-        ],
-    )
-    def test_encode_http_target(self, target, expected_target):
-        with PoolManager() as http:
-            url = "http://%s:%d%s" % (self.host, self.port, target)
-            r = http.request("GET", url)
-            assert r.data == expected_target
 
 
 @pytest.mark.skipif(not HAS_IPV6, reason="IPv6 is not supported on this system")

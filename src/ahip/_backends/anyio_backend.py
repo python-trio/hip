@@ -44,7 +44,7 @@ class AnyIOSocket(AsyncSocket):
     def getpeercert(self, binary_form=False):
         return self._stream.getpeercert(binary_form=binary_form)
 
-    async def receive_some(self):
+    async def receive_some(self, read_timeout):
         return await self._stream.receive_some(BUFSIZE)
 
     async def send_and_receive_for_a_while(

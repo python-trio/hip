@@ -16,7 +16,6 @@ from __future__ import absolute_import
 
 import collections
 import datetime
-import itertools
 import socket
 import warnings
 
@@ -35,6 +34,7 @@ from .exceptions import (
 )
 from .packages import six
 from .util import ssl_ as ssl_util
+from .util.unasync import await_if_coro, anext, ASYNC_MODE
 from ._backends._common import LoopAbort
 from ._backends._loader import load_backend, normalize_backend
 
@@ -42,24 +42,6 @@ try:
     import ssl
 except ImportError:
     ssl = None
-
-
-def is_async_mode():
-    """Tests if we're in the async part of the code or not"""
-
-    async def f():
-        """Unasync transforms async functions in sync functions"""
-        return None
-
-    obj = f()
-    if obj is None:
-        return False
-    else:
-        obj.close()  # prevent unawaited coroutine warning
-        return True
-
-
-_ASYNC_MODE = is_async_mode()
 
 
 # When it comes time to update this value as a part of regular maintenance
@@ -106,17 +88,16 @@ def _stringify_headers(headers):
         yield (name, value)
 
 
-def _read_readable(readable):
+async def _read_readable(readable):
     # TODO: reconsider this block size
     blocksize = 8192
     while True:
-        datablock = readable.read(blocksize)
+        datablock = await await_if_coro(readable.read(blocksize))
         if not datablock:
             break
         yield datablock
 
 
-# XX this should return an async iterator
 def _make_body_iterable(body):
     """
     This function turns all possible body types that Hip supports into an
@@ -134,63 +115,83 @@ def _make_body_iterable(body):
     is deliberate: users must make choices about the encoding of the data they
     use.
     """
-    if body is None:
-        return []
-    elif isinstance(body, bytes):
-        return [body]
-    elif hasattr(body, "read"):
-        return _read_readable(body)
-    elif isinstance(body, collections.Iterable) and not isinstance(body, six.text_type):
-        return body
-    else:
-        raise InvalidBodyError("Unacceptable body type: %s" % type(body))
+
+    async def generator():
+        if body is None:
+            return
+        elif isinstance(body, bytes):
+            yield body
+        elif hasattr(body, "read"):
+            async for chunk in _read_readable(body):
+                yield chunk
+        elif isinstance(body, collections.Iterable) and not isinstance(
+            body, six.text_type
+        ):
+            for chunk in body:
+                yield chunk
+        else:
+            raise InvalidBodyError("Unacceptable body type: %s" % type(body))
+
+    return generator().__aiter__()
 
 
-# XX this should return an async iterator
 def _request_bytes_iterable(request, state_machine):
     """
     An iterable that serialises a set of bytes for the body.
     """
 
     def all_pieces_iter():
-        h11_request = h11.Request(
-            method=request.method,
-            target=request.target,
-            headers=_stringify_headers(request.headers.items()),
+        async def generator():
+            h11_request = h11.Request(
+                method=request.method,
+                target=request.target,
+                headers=_stringify_headers(request.headers.items()),
+            )
+            yield state_machine.send(h11_request)
+
+            async for chunk in _make_body_iterable(request.body):
+                yield state_machine.send(h11.Data(data=chunk))
+
+            yield state_machine.send(h11.EndOfMessage())
+
+        return generator().__aiter__()
+
+    async def generator():
+
+        # Try to combine the header bytes + (first set of body bytes or end of
+        # message bytes) into one packet.
+        # As long as all_pieces_iter() yields at least two messages, this should
+        # never raise StopIteration.
+        remaining_pieces = all_pieces_iter()
+        first_packet_bytes = (await anext(remaining_pieces)) + (
+            await anext(remaining_pieces)
         )
-        yield state_machine.send(h11_request)
 
-        for chunk in _make_body_iterable(request.body):
-            yield state_machine.send(h11.Data(data=chunk))
+        async def all_pieces_combined_iter():
+            yield first_packet_bytes
+            async for piece in remaining_pieces:
+                yield piece
 
-        yield state_machine.send(h11.EndOfMessage())
+        # We filter out any empty strings, because we don't want to call
+        # send(b""). You might think this is a no-op, so it shouldn't matter
+        # either way. But this isn't true. For example, if we're sending a request
+        # with Content-Length framing, we could have this sequence:
+        #
+        # - We send the last Data event.
+        # - The peer immediately sends its response and closes the socket.
+        # - We attempt to send the EndOfMessage event, which (b/c this request has
+        #   Content-Length framing) is encoded as b"".
+        # - We call send(b"").
+        # - This triggers the kernel / SSL layer to discover that the socket is
+        #   closed, so it raises an exception.
+        #
+        # It's easier to fix this once here instead of worrying about it in all
+        # the different backends.
+        async for piece in all_pieces_combined_iter():
+            if piece:
+                yield piece
 
-    # Try to combine the header bytes + (first set of body bytes or end of
-    # message bytes) into one packet.
-    # As long as all_pieces_iter() yields at least two messages, this should
-    # never raise StopIteration.
-    remaining_pieces = all_pieces_iter()
-    first_packet_bytes = next(remaining_pieces) + next(remaining_pieces)
-    all_pieces_combined_iter = itertools.chain([first_packet_bytes], remaining_pieces)
-
-    # We filter out any empty strings, because we don't want to call
-    # send(b""). You might think this is a no-op, so it shouldn't matter
-    # either way. But this isn't true. For example, if we're sending a request
-    # with Content-Length framing, we could have this sequence:
-    #
-    # - We send the last Data event.
-    # - The peer immediately sends its response and closes the socket.
-    # - We attempt to send the EndOfMessage event, which (b/c this request has
-    #   Content-Length framing) is encoded as b"".
-    # - We call send(b"").
-    # - This triggers the kernel / SSL layer to discover that the socket is
-    #   closed, so it raises an exception.
-    #
-    # It's easier to fix this once here instead of worrying about it in all
-    # the different backends.
-    for piece in all_pieces_combined_iter:
-        if piece:
-            yield piece
+    return generator().__aiter__()
 
 
 def _response_from_h11(h11_response, body_object):
@@ -259,8 +260,8 @@ async def _start_http_request(request, state_machine, sock, read_timeout=None):
 
     async def produce_bytes():
         try:
-            return next(request_bytes_iterable)
-        except StopIteration:
+            return await anext(request_bytes_iterable)
+        except StopAsyncIteration:
             # We successfully sent the whole body!
             context["send_aborted"] = False
             return None
@@ -346,7 +347,7 @@ class HTTP1Connection(object):
     ):
         self.is_verified = False
         self.read_timeout = None
-        self._backend = load_backend(normalize_backend(backend, _ASYNC_MODE))
+        self._backend = load_backend(normalize_backend(backend, ASYNC_MODE))
         self._host = host
         self._port = port
         self._socket_options = (

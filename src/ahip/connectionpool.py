@@ -620,7 +620,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
 
         # Rewind body position, if needed. Record current position
         # for future rewinds in the event of a redirect/retry.
-        body_pos = set_file_position(body, body_pos)
+        body_pos = await set_file_position(body, body_pos)
 
         if body is not None:
             _add_transport_headers(headers)

@@ -15,6 +15,17 @@ with open(os.path.join(base_path, "src", "ahip", "__init__.py")) as fp:
 setup(
     version=version,
     cmdclass={
-        "build_py": unasync.cmdclass_build_py(rules=[unasync.Rule("/ahip/", "/hip/")])
+        "build_py": unasync.cmdclass_build_py(
+            rules=[
+                unasync.Rule(
+                    "/ahip/",
+                    "/hip/",
+                    additional_replacements={
+                        "anext": "next",
+                        "await_if_coro": "return_non_coro",
+                    },
+                )
+            ]
+        )
     },
 )

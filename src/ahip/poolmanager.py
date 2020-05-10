@@ -323,7 +323,7 @@ class PoolManager(RequestMethods):
         # for future rewinds in the event of a redirect/retry.
         body = kw.get("body")
         body_pos = kw.get("body_pos")
-        kw["body_pos"] = set_file_position(body, body_pos)
+        kw["body_pos"] = await set_file_position(body, body_pos)
 
         if "headers" not in kw:
             kw["headers"] = self.headers.copy()
