@@ -105,6 +105,19 @@ def notPyPy2(test):
     return wrapper
 
 
+def skipPyPy3(test):
+    """Skips this test on PyPy3"""
+
+    @six.wraps(test)
+    def wrapper(*args, **kwargs):
+        if platform.python_implementation() == "PyPy" and sys.version_info[0] == 3:
+            msg = "{} hangs on PyPy3".format(test.__name__)
+            pytest.skip(msg)
+        return test(*args, **kwargs)
+
+    return wrapper
+
+
 def onlyBrotlipy():
     return pytest.mark.skipif(brotli is None, reason="only run if brotlipy is present")
 

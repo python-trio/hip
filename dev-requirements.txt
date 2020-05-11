@@ -1,5 +1,5 @@
 mock==3.0.5
-coverage~=4.5
+coverage~=5.1
 tornado==5.1.1
 PySocks==1.7.1
 # https://github.com/Anorov/PySocks/issues/131

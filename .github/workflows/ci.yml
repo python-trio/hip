@@ -84,14 +84,9 @@ jobs:
         run: |
           nox -s test-${{ matrix.python-version }}
       - name: Upload Coverage
-        uses: codecov/codecov-action@v1
-        with:
-          token: 3bb38a90-137e-4efe-9627-ca66de472c13
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          yml: ./codecov.yml
-          fail_ci_if_error: true
+        run: ./ci/upload_coverage.sh
+        env:
+          JOB_NAME: 'macOS (${{ matrix.python-version }})'
 
   Windows:
     runs-on: windows-latest
@@ -122,11 +117,7 @@ jobs:
         run: |
           nox -s test-${{ matrix.python-version }}
       - name: Upload Coverage
-        uses: codecov/codecov-action@v1
-        with:
-          token: 3bb38a90-137e-4efe-9627-ca66de472c13
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          yml: ./codecov.yml
-          fail_ci_if_error: true
+        run: ./ci/upload_coverage.sh
+        shell: bash
+        env:
+          JOB_NAME: 'Windows (${{ matrix.python-version }})'

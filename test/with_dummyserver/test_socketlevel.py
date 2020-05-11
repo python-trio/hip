@@ -17,6 +17,7 @@ from hip.util.timeout import Timeout
 from hip.util.retry import Retry
 from hip._collections import HTTPHeaderDict
 
+from test import skipPyPy3
 from dummyserver.testcase import SocketDummyServerTestCase, consume_socket
 from dummyserver.server import (
     DEFAULT_CERTS,
@@ -1287,6 +1288,7 @@ class TestSSL(SocketDummyServerTestCase):
             finally:
                 timed_out.set()
 
+    @skipPyPy3
     def test_ssl_failed_fingerprint_verification(self):
         def socket_handler(listener):
             for i in range(2):
