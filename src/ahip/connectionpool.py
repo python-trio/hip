@@ -43,7 +43,6 @@ from .util.ssl_ import (
 )
 from .util.timeout import Timeout
 from .util.url import (
-    get_host,
     parse_url,
     Url,
     _normalize_host as normalize_host,
@@ -499,7 +498,10 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
             return True
 
         # TODO: Add optional support for socket.gethostbyname checking.
-        scheme, host, port = get_host(url)
+        url = parse_url(url)
+        scheme = url.scheme or "http"
+        host = url.hostname
+        port = url.port
         if host is not None:
             host = _normalize_host(host, scheme=scheme)
 
@@ -911,8 +913,11 @@ def connection_from_url(url, **kw):
         >>> conn = connection_from_url('http://google.com/')
         >>> r = conn.request('GET', '/')
     """
-    scheme, host, port = get_host(url)
-    port = port or DEFAULT_PORTS.get(scheme, 80)
+    url = parse_url(url)
+    scheme = url.scheme or "http"
+    host = url.hostname
+    port = url.port or DEFAULT_PORTS.get(scheme, 80)
+
     if scheme == "https":
         return HTTPSConnectionPool(host, port=port, **kw)
     else:

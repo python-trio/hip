@@ -19,7 +19,7 @@ from .ssl_ import (
 from .timeout import current_time, Timeout
 
 from .retry import Retry
-from .url import get_host, parse_url, split_first, Url
+from .url import parse_url, Url
 from .wait import wait_for_read, wait_for_write, wait_for_socket
 
 __all__ = (
@@ -34,12 +34,10 @@ __all__ = (
     "assert_fingerprint",
     "current_time",
     "is_connection_dropped",
-    "get_host",
     "parse_url",
     "make_headers",
     "resolve_cert_reqs",
     "resolve_ssl_version",
-    "split_first",
     "ssl_wrap_socket",
     "wait_for_read",
     "wait_for_write",

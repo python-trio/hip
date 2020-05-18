@@ -172,41 +172,6 @@ class Url(namedtuple("Url", url_attrs)):
         return self.url
 
 
-def split_first(s, delims):
-    """
-    .. deprecated:: 1.25
-
-    Given a string and an iterable of delimiters, split on the first found
-    delimiter. Return two split parts and the matched delimiter.
-
-    If not found, then the first part is the full input string.
-
-    Example::
-
-        >>> split_first('foo/bar?baz', '?/=')
-        ('foo', 'bar?baz', '/')
-        >>> split_first('foo/bar?baz', '123')
-        ('foo/bar?baz', '', None)
-
-    Scales linearly with number of delims. Not ideal for large number of delims.
-    """
-    min_idx = None
-    min_delim = None
-    for d in delims:
-        idx = s.find(d)
-        if idx < 0:
-            continue
-
-        if min_idx is None or idx < min_idx:
-            min_idx = idx
-            min_delim = d
-
-    if min_idx is None or min_idx < 0:
-        return s, "", None
-
-    return s[:min_idx], s[min_idx + 1 :], min_delim
-
-
 def _encode_invalid_chars(component, allowed_chars, encoding="utf-8"):
     """Percent-encodes a URI component without reapplying
     onto an already percent-encoded component.
@@ -394,15 +359,9 @@ def parse_url(url):
     except (ValueError, AttributeError):
         return six.raise_from(LocationParseError(source_url), None)
 
-    # For the sake of backwards compatibility we put empty
-    # string values for path if there are any defined values
-    # beyond the path in the URL.
-    # TODO: Remove this when we break backwards compatibility.
+    # Replace empty strings with 'None'
     if not path:
-        if query is not None or fragment is not None:
-            path = ""
-        else:
-            path = None
+        path = None
 
     # Ensure that each part of the URL is a `str` for
     # backwards compatibility.
@@ -423,11 +382,3 @@ def parse_url(url):
         query=ensure_type(query),
         fragment=ensure_type(fragment),
     )
-
-
-def get_host(url):
-    """
-    Deprecated. Use :func:`parse_url` instead.
-    """
-    p = parse_url(url)
-    return p.scheme or "http", p.hostname, p.port

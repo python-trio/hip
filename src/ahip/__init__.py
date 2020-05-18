@@ -10,7 +10,6 @@ from .filepost import encode_multipart_formdata
 from .poolmanager import PoolManager, ProxyManager, proxy_from_url
 from .response import HTTPResponse
 from .util.request import make_headers
-from .util.url import get_host
 from .util.timeout import Timeout
 from .util.retry import Retry
 
@@ -35,7 +34,6 @@ __all__ = [
     "connection_from_url",
     "disable_warnings",
     "encode_multipart_formdata",
-    "get_host",
     "make_headers",
     "proxy_from_url",
 ]

@@ -1,25 +1,11 @@
 import pytest
 
-from hip.filepost import encode_multipart_formdata, iter_fields
+from hip.filepost import encode_multipart_formdata
 from hip.fields import RequestField
 from hip.packages.six import b, u
 
 
 BOUNDARY = "!! test boundary !!"
-
-
-class TestIterfields(object):
-    def test_dict(self):
-        for fieldname, value in iter_fields(dict(a="b")):
-            assert (fieldname, value) == ("a", "b")
-
-        assert list(sorted(iter_fields(dict(a="b", c="d")))) == [("a", "b"), ("c", "d")]
-
-    def test_tuple_list(self):
-        for fieldname, value in iter_fields([("a", "b")]):
-            assert (fieldname, value) == ("a", "b")
-
-        assert list(iter_fields([("a", "b"), ("c", "d")])) == [("a", "b"), ("c", "d")]
 
 
 class TestMultipartEncoding(object):

@@ -42,24 +42,6 @@ def iter_field_objects(fields):
             yield RequestField.from_tuples(*field)
 
 
-def iter_fields(fields):
-    """
-    .. deprecated:: 1.6
-
-    Iterate over fields.
-
-    The addition of :class:`~hip.fields.RequestField` makes this function
-    obsolete. Instead, use :func:`iter_field_objects`, which returns
-    :class:`~hip.fields.RequestField` objects.
-
-    Supports list of (k, v) tuples and dicts.
-    """
-    if isinstance(fields, dict):
-        return ((k, v) for k, v in six.iteritems(fields))
-
-    return ((k, v) for k, v in fields)
-
-
 def encode_multipart_formdata(fields, boundary=None):
     """
     Encode a dictionary of ``fields`` using the multipart/form-data MIME format.

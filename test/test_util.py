@@ -14,7 +14,7 @@ from hip import add_stderr_logger, disable_warnings
 from hip.util.request import make_headers, rewind_body, _FAILEDTELL
 from hip.util.retry import Retry
 from hip.util.timeout import Timeout
-from hip.util.url import get_host, parse_url, split_first, Url
+from hip.util.url import parse_url, Url
 from hip.util.ssl_ import (
     resolve_cert_reqs,
     resolve_ssl_version,
@@ -45,98 +45,6 @@ TIMEOUT_EPOCH = 1000
 
 class TestUtil(object):
 
-    url_host_map = [
-        # Hosts
-        ("http://google.com/mail", ("http", "google.com", None)),
-        ("http://google.com/mail/", ("http", "google.com", None)),
-        ("google.com/mail", ("http", "google.com", None)),
-        ("http://google.com/", ("http", "google.com", None)),
-        ("http://google.com", ("http", "google.com", None)),
-        ("http://www.google.com", ("http", "www.google.com", None)),
-        ("http://mail.google.com", ("http", "mail.google.com", None)),
-        ("http://google.com:8000/mail/", ("http", "google.com", 8000)),
-        ("http://google.com:8000", ("http", "google.com", 8000)),
-        ("https://google.com", ("https", "google.com", None)),
-        ("https://google.com:8000", ("https", "google.com", 8000)),
-        ("http://user:password@127.0.0.1:1234", ("http", "127.0.0.1", 1234)),
-        ("http://google.com/foo=http://bar:42/baz", ("http", "google.com", None)),
-        ("http://google.com?foo=http://bar:42/baz", ("http", "google.com", None)),
-        ("http://google.com#foo=http://bar:42/baz", ("http", "google.com", None)),
-        # IPv4
-        ("173.194.35.7", ("http", "173.194.35.7", None)),
-        ("http://173.194.35.7", ("http", "173.194.35.7", None)),
-        ("http://173.194.35.7/test", ("http", "173.194.35.7", None)),
-        ("http://173.194.35.7:80", ("http", "173.194.35.7", 80)),
-        ("http://173.194.35.7:80/test", ("http", "173.194.35.7", 80)),
-        # IPv6
-        ("[2a00:1450:4001:c01::67]", ("http", "[2a00:1450:4001:c01::67]", None)),
-        ("http://[2a00:1450:4001:c01::67]", ("http", "[2a00:1450:4001:c01::67]", None)),
-        (
-            "http://[2a00:1450:4001:c01::67]/test",
-            ("http", "[2a00:1450:4001:c01::67]", None),
-        ),
-        (
-            "http://[2a00:1450:4001:c01::67]:80",
-            ("http", "[2a00:1450:4001:c01::67]", 80),
-        ),
-        (
-            "http://[2a00:1450:4001:c01::67]:80/test",
-            ("http", "[2a00:1450:4001:c01::67]", 80),
-        ),
-        # More IPv6 from http://www.ietf.org/rfc/rfc2732.txt
-        (
-            "http://[fedc:ba98:7654:3210:fedc:ba98:7654:3210]:8000/index.html",
-            ("http", "[fedc:ba98:7654:3210:fedc:ba98:7654:3210]", 8000),
-        ),
-        (
-            "http://[1080:0:0:0:8:800:200c:417a]/index.html",
-            ("http", "[1080:0:0:0:8:800:200c:417a]", None),
-        ),
-        ("http://[3ffe:2a00:100:7031::1]", ("http", "[3ffe:2a00:100:7031::1]", None)),
-        (
-            "http://[1080::8:800:200c:417a]/foo",
-            ("http", "[1080::8:800:200c:417a]", None),
-        ),
-        ("http://[::192.9.5.5]/ipng", ("http", "[::192.9.5.5]", None)),
-        (
-            "http://[::ffff:129.144.52.38]:42/index.html",
-            ("http", "[::ffff:129.144.52.38]", 42),
-        ),
-        (
-            "http://[2010:836b:4179::836b:4179]",
-            ("http", "[2010:836b:4179::836b:4179]", None),
-        ),
-        # Hosts
-        ("HTTP://GOOGLE.COM/mail/", ("http", "google.com", None)),
-        ("GOogle.COM/mail", ("http", "google.com", None)),
-        ("HTTP://GoOgLe.CoM:8000/mail/", ("http", "google.com", 8000)),
-        ("HTTP://user:password@EXAMPLE.COM:1234", ("http", "example.com", 1234)),
-        ("173.194.35.7", ("http", "173.194.35.7", None)),
-        ("HTTP://173.194.35.7", ("http", "173.194.35.7", None)),
-        (
-            "HTTP://[2a00:1450:4001:c01::67]:80/test",
-            ("http", "[2a00:1450:4001:c01::67]", 80),
-        ),
-        (
-            "HTTP://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:8000/index.html",
-            ("http", "[fedc:ba98:7654:3210:fedc:ba98:7654:3210]", 8000),
-        ),
-        (
-            "HTTPS://[1080:0:0:0:8:800:200c:417A]/index.html",
-            ("https", "[1080:0:0:0:8:800:200c:417a]", None),
-        ),
-        ("abOut://eXamPlE.com?info=1", ("about", "eXamPlE.com", None)),
-        (
-            "http+UNIX://%2fvar%2frun%2fSOCKET/path",
-            ("http+unix", "%2fvar%2frun%2fSOCKET", None),
-        ),
-    ]
-
-    @pytest.mark.parametrize("url, expected_host", url_host_map)
-    def test_get_host(self, url, expected_host):
-        returned_host = get_host(url)
-        assert returned_host == expected_host
-
     # TODO: Add more tests
     @pytest.mark.parametrize(
         "location",
@@ -150,7 +58,7 @@ class TestUtil(object):
     )
     def test_invalid_host(self, location):
         with pytest.raises(LocationParseError):
-            get_host(location)
+            parse_url(location)
 
     @pytest.mark.parametrize(
         "url",
@@ -228,11 +136,11 @@ class TestUtil(object):
         ("google.com/mail", Url(host="google.com", path="/mail")),
         ("http://google.com/", Url("http", host="google.com", path="/")),
         ("http://google.com", Url("http", host="google.com")),
-        ("http://google.com?foo", Url("http", host="google.com", path="", query="foo")),
+        ("http://google.com?foo", Url("http", host="google.com", query="foo")),
         # Path/query/fragment
         ("", Url()),
         ("/", Url(path="/")),
-        ("#?/!google.com/?foo", Url(path="", fragment="?/!google.com/?foo")),
+        ("#?/!google.com/?foo", Url(fragment="?/!google.com/?foo")),
         ("/foo", Url(path="/foo")),
         ("/foo?bar=baz", Url(path="/foo", query="bar=baz")),
         (
@@ -266,12 +174,136 @@ class TestUtil(object):
             "http://foo:bar@localhost/",
             Url("http", auth="foo:bar", host="localhost", path="/"),
         ),
+        (
+            "http://user:password@127.0.0.1:1234",
+            Url(scheme="http", auth="user:password", host="127.0.0.1", port=1234),
+        ),
+        (
+            "http://google.com/foo=http://bar:42/baz",
+            Url(scheme="http", host="google.com", path="/foo=http://bar:42/baz"),
+        ),
+        (
+            "http://google.com?foo=http://bar:42/baz",
+            Url(scheme="http", host="google.com", query="foo=http://bar:42/baz"),
+        ),
+        (
+            "http://google.com#foo=http://bar:42/baz",
+            Url(scheme="http", host="google.com", fragment="foo=http://bar:42/baz"),
+        ),
+        # IPv4
+        ("173.194.35.7", Url(scheme=None, host="173.194.35.7")),
+        ("http://173.194.35.7", Url(scheme="http", host="173.194.35.7")),
+        (
+            "http://173.194.35.7/test",
+            Url(scheme="http", host="173.194.35.7", path="/test"),
+        ),
+        ("http://173.194.35.7:80", Url(scheme="http", host="173.194.35.7", port=80)),
+        (
+            "http://173.194.35.7:80/test",
+            Url(scheme="http", host="173.194.35.7", port=80, path="/test"),
+        ),
+        # IPv6
+        ("[2a00:1450:4001:c01::67]", Url(auth=None, host="[2a00:1450:4001:c01::67]")),
+        (
+            "http://[2a00:1450:4001:c01::67]",
+            Url(scheme="http", host="[2a00:1450:4001:c01::67]"),
+        ),
+        (
+            "http://[2a00:1450:4001:c01::67]/test",
+            Url(scheme="http", host="[2a00:1450:4001:c01::67]", path="/test"),
+        ),
+        (
+            "http://[2a00:1450:4001:c01::67]:80",
+            Url(scheme="http", host="[2a00:1450:4001:c01::67]", port=80),
+        ),
+        (
+            "http://[2a00:1450:4001:c01::67]:80/test",
+            Url(scheme="http", host="[2a00:1450:4001:c01::67]", port=80, path="/test"),
+        ),
+        # More IPv6 from http://www.ietf.org/rfc/rfc2732.txt
+        (
+            "http://[fedc:ba98:7654:3210:fedc:ba98:7654:3210]:8000/index.html",
+            Url(
+                scheme="http",
+                host="[fedc:ba98:7654:3210:fedc:ba98:7654:3210]",
+                port=8000,
+                path="/index.html",
+            ),
+        ),
+        (
+            "http://[1080:0:0:0:8:800:200c:417a]/index.html",
+            Url(scheme="http", host="[1080:0:0:0:8:800:200c:417a]", path="/index.html"),
+        ),
+        (
+            "http://[3ffe:2a00:100:7031::1]",
+            Url(scheme="http", host="[3ffe:2a00:100:7031::1]"),
+        ),
+        (
+            "http://[1080::8:800:200c:417a]/foo",
+            Url(scheme="http", host="[1080::8:800:200c:417a]", path="/foo"),
+        ),
+        (
+            "http://[::192.9.5.5]/ipng",
+            Url(scheme="http", host="[::192.9.5.5]", path="/ipng"),
+        ),
+        (
+            "http://[::ffff:129.144.52.38]:42/index.html",
+            Url(
+                scheme="http",
+                host="[::ffff:129.144.52.38]",
+                port=42,
+                path="/index.html",
+            ),
+        ),
+        (
+            "http://[2010:836b:4179::836b:4179]",
+            Url(scheme="http", host="[2010:836b:4179::836b:4179]"),
+        ),
+        # Hosts
+        ("google.com/mail", Url(scheme=None, host="google.com", path="/mail")),
+        (
+            "http://google.com:8000/mail/",
+            Url(scheme="http", host="google.com", port=8000, path="/mail/"),
+        ),
+        (
+            "http://user:password@example.com:1234",
+            Url(scheme="http", auth="user:password", host="example.com", port=1234),
+        ),
+        ("173.194.35.7", Url(scheme=None, host="173.194.35.7")),
+        ("http://173.194.35.7", Url(scheme="http", host="173.194.35.7")),
+        (
+            "http://[2a00:1450:4001:c01::67]:80/test",
+            Url(scheme="http", host="[2a00:1450:4001:c01::67]", port=80, path="/test"),
+        ),
+        (
+            "http://[fedc:ba98:7654:3210:fedc:ba98:7654:3210]:8000/index.html",
+            Url(
+                scheme="http",
+                host="[fedc:ba98:7654:3210:fedc:ba98:7654:3210]",
+                port=8000,
+                path="/index.html",
+            ),
+        ),
+        (
+            "https://[1080:0:0:0:8:800:200c:417a]/index.html",
+            Url(
+                scheme="https", host="[1080:0:0:0:8:800:200c:417a]", path="/index.html"
+            ),
+        ),
+        (
+            "about://eXamPlE.com?info=1",
+            Url(scheme="about", host="eXamPlE.com", query="info=1"),
+        ),
+        (
+            "http+unix://%2fvar%2frun%2fSOCKET/path",
+            Url(scheme="http+unix", host="%2fvar%2frun%2fSOCKET", path="/path"),
+        ),
     ]
 
     non_round_tripping_parse_url_host_map = [
         # Path/query/fragment
-        ("?", Url(path="", query="")),
-        ("#", Url(path="", fragment="")),
+        ("?", Url(query="")),
+        ("#", Url(fragment="")),
         # Path normalization
         ("/abc/../def", Url(path="/def")),
         # Empty Port
@@ -295,11 +327,53 @@ class TestUtil(object):
         (u"http://google.com/\uD800", Url("http", host="google.com", path="%ED%A0%80")),
         (
             u"http://google.com?q=\uDC00",
-            Url("http", host="google.com", path="", query="q=%ED%B0%80"),
+            Url("http", host="google.com", query="q=%ED%B0%80"),
         ),
         (
             u"http://google.com#\uDC00",
-            Url("http", host="google.com", path="", fragment="%ED%B0%80"),
+            Url("http", host="google.com", fragment="%ED%B0%80"),
+        ),
+        # Hosts and Schemes
+        (
+            "HTTP://GOOGLE.COM/mail/",
+            Url(scheme="http", host="google.com", path="/mail/"),
+        ),
+        ("GOogle.COM/mail", Url(scheme=None, host="google.com", path="/mail")),
+        (
+            "HTTP://GoOgLe.CoM:8000/mail/",
+            Url(scheme="http", host="google.com", port=8000, path="/mail/"),
+        ),
+        (
+            "HTTP://user:password@EXAMPLE.COM:1234",
+            Url(scheme="http", auth="user:password", host="example.com", port=1234),
+        ),
+        ("HTTP://173.194.35.7", Url(scheme="http", host="173.194.35.7")),
+        (
+            "HTTP://[2a00:1450:4001:c01::67]:80/test",
+            Url(scheme="http", host="[2a00:1450:4001:c01::67]", port=80, path="/test"),
+        ),
+        (
+            "HTTP://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:8000/index.html",
+            Url(
+                scheme="http",
+                host="[fedc:ba98:7654:3210:fedc:ba98:7654:3210]",
+                port=8000,
+                path="/index.html",
+            ),
+        ),
+        (
+            "HTTPS://[1080:0:0:0:8:800:200c:417A]/index.html",
+            Url(
+                scheme="https", host="[1080:0:0:0:8:800:200c:417a]", path="/index.html"
+            ),
+        ),
+        (
+            "aBoUt://eXamPlE.com?info=1",
+            Url(scheme="about", host="eXamPlE.com", query="info=1"),
+        ),
+        (
+            "http+UNIX://%2fvar%2frun%2fSOCKET/path",
+            Url(scheme="http+unix", host="%2fvar%2frun%2fSOCKET", path="/path"),
         ),
     ]
 
@@ -376,7 +450,7 @@ class TestUtil(object):
         # urlparse doesn't follow RFC 3986 Section 3.2
         (
             "http://google.com#@evil.com/",
-            Url("http", host="google.com", path="", fragment="@evil.com/"),
+            Url("http", host="google.com", fragment="@evil.com/"),
         ),
         # CVE-2016-5699
         (
@@ -412,7 +486,6 @@ class TestUtil(object):
             Url(
                 host="10.251.0.83",
                 port=7777,
-                path="",
                 query="a=1%20HTTP/1.1%0D%0AX-injected:%20header",
             ),
         ),
@@ -422,7 +495,6 @@ class TestUtil(object):
                 scheme="http",
                 host="127.0.0.1",
                 port=6379,
-                path="",
                 query="%0D%0ASET%20test%20failure12%0D%0A:8080/test/?test=a",
             ),
         ),
@@ -534,21 +606,6 @@ class TestUtil(object):
 
         with pytest.raises(UnrewindableBodyError):
             rewind_body(BadSeek(), body_pos=2)
-
-    @pytest.mark.parametrize(
-        "input, expected",
-        [
-            (("abcd", "b"), ("a", "cd", "b")),
-            (("abcd", "cb"), ("a", "cd", "b")),
-            (("abcd", ""), ("abcd", "", None)),
-            (("abcd", "a"), ("", "bcd", "a")),
-            (("abcd", "ab"), ("", "bcd", "a")),
-            (("abcd", "eb"), ("a", "cd", "b")),
-        ],
-    )
-    def test_split_first(self, input, expected):
-        output = split_first(*input)
-        assert output == expected
 
     def test_add_stderr_logger(self):
         handler = add_stderr_logger(level=logging.INFO)  # Don't actually print debug
