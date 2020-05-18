@@ -13,6 +13,11 @@ from dummyserver.server import (
 from dummyserver.handlers import TestingApp
 from dummyserver.proxy import ProxyHandler
 
+try:
+    import asyncio
+except ImportError:
+    asyncio = None
+
 
 def consume_socket(sock, chunks=65536):
     consumed = bytearray()
@@ -122,12 +127,24 @@ class HTTPDummyServerTestCase(object):
 
     @classmethod
     def _start_server(cls):
-        cls.io_loop = ioloop.IOLoop.current()
+        def _run_server_in_thread():
+            # The event loop MUST be instantiated in the worker thread, or it will
+            # interfere with the tests targeting asyncio
+            if asyncio:
+                asyncio.set_event_loop(asyncio.new_event_loop())
+
+            cls.io_loop = ioloop.IOLoop.current()
+            cls.server, cls.port = run_tornado_app(
+                app, cls.io_loop, cls.certs, cls.scheme, cls.host
+            )
+            ready_event.set()
+            cls.io_loop.start()
+
         app = web.Application([(r".*", TestingApp)])
-        cls.server, cls.port = run_tornado_app(
-            app, cls.io_loop, cls.certs, cls.scheme, cls.host
-        )
-        cls.server_thread = run_loop_in_thread(cls.io_loop)
+        ready_event = threading.Event()
+        cls.server_thread = threading.Thread(target=_run_server_in_thread)
+        cls.server_thread.start()
+        ready_event.wait(5)
 
     @classmethod
     def _stop_server(cls):

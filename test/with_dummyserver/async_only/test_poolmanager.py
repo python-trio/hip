@@ -6,14 +6,19 @@ from ahip import PoolManager
 from ahip.exceptions import UnrewindableBodyError
 
 from test.with_dummyserver import conftest
+from dummyserver.testcase import HTTPDummyServerTestCase
 
 
-class TestFileUploads:
+class TestFileUploads(HTTPDummyServerTestCase):
+    @classmethod
+    def setup_class(cls):
+        super(TestFileUploads, cls).setup_class()
+        cls.base_url = "http://%s:%d" % (cls.host, cls.port)
+        cls.base_url_alt = "http://%s:%d" % (cls.host_alt, cls.port)
+
     @conftest.test_all_backends
-    async def test_upload_anyio_async_files(self, http_server, backend, anyio_backend):
+    async def test_upload_anyio_async_files(self, backend, anyio_backend):
         """Uploading a file opened via 'anyio.aopen()' should be possible"""
-        base_url = "http://{}:{}".format(http_server.host, http_server.port)
-
         with open(__file__, mode="rb") as f:
             data = f.read()
             content_length = len(data)
@@ -21,7 +26,7 @@ class TestFileUploads:
         headers = {
             "Content-Length": str(content_length),
         }
-        url = "%s/echo" % base_url
+        url = "%s/echo" % self.base_url
 
         with PoolManager(backend=backend) as http:
             async with await anyio.aopen(__file__, mode="rb") as f:
@@ -30,10 +35,8 @@ class TestFileUploads:
                 assert resp.data == data
 
     @pytest.mark.trio
-    async def test_upload_trio_wrapped_files(self, http_server):
+    async def test_upload_trio_wrapped_files(self):
         """Uploading a file wrapped via 'trio.wrap_file()' should be possible"""
-        base_url = "http://{}:{}".format(http_server.host, http_server.port)
-
         with open(__file__, mode="rb") as f:
             data = f.read()
             content_length = len(data)
@@ -41,7 +44,7 @@ class TestFileUploads:
         headers = {
             "Content-Length": str(content_length),
         }
-        url = "%s/echo" % base_url
+        url = "%s/echo" % self.base_url
 
         with PoolManager(backend="trio") as http:
             with open(__file__, mode="rb") as f:
@@ -51,19 +54,15 @@ class TestFileUploads:
                 assert resp.data == data
 
     @conftest.test_all_backends
-    async def test_redirect_with_failed_async_tell(
-        self, http_server, backend, anyio_backend
-    ):
+    async def test_redirect_with_failed_async_tell(self, backend, anyio_backend):
         """Abort request if failed to get a position from async tell()"""
-
-        base_url = "http://{}:{}".format(http_server.host, http_server.port)
 
         class BadTellObject(io.BytesIO):
             async def tell(self):
                 raise IOError
 
         body = BadTellObject(b"the data")
-        url = "%s/redirect?target=/successful_retry" % base_url
+        url = "%s/redirect?target=/successful_retry" % self.base_url
         # httplib uses fileno if Content-Length isn't supplied,
         # which is unsupported by BytesIO.
         headers = {"Content-Length": "8"}
@@ -74,19 +73,15 @@ class TestFileUploads:
             assert "Unable to record file position for" in str(e.value)
 
     @conftest.test_all_backends
-    async def test_redirect_with_failed_async_seek(
-        self, http_server, backend, anyio_backend
-    ):
+    async def test_redirect_with_failed_async_seek(self, backend, anyio_backend):
         """Abort request if failed to restore position with async seek()"""
-
-        base_url = "http://{}:{}".format(http_server.host, http_server.port)
 
         class BadSeekObject(io.BytesIO):
             async def seek(self, *_):
                 raise IOError
 
         body = BadSeekObject(b"the data")
-        url = "%s/redirect?target=/successful_retry" % base_url
+        url = "%s/redirect?target=/successful_retry" % self.base_url
         # httplib uses fileno if Content-Length isn't supplied,
         # which is unsupported by BytesIO.
         headers = {"Content-Length": "8"}

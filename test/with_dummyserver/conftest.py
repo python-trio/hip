@@ -7,7 +7,7 @@ from tornado import web, ioloop
 import trustme
 
 from dummyserver.handlers import TestingApp
-from dummyserver.server import DEFAULT_CERTS, run_tornado_app
+from dummyserver.server import run_tornado_app
 
 try:
     import asyncio
@@ -57,12 +57,6 @@ def run_server_in_thread(scheme, host, ca_certs, server_certs):
     ctx["io_loop"].add_callback(ctx["server"].stop)
     ctx["io_loop"].add_callback(ctx["io_loop"].stop)
     server_thread.join()
-
-
-@pytest.fixture
-def http_server():
-    with run_server_in_thread("http", "localhost", None, DEFAULT_CERTS) as cfg:
-        yield cfg
 
 
 @pytest.fixture
