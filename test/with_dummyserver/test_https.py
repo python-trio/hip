@@ -1,13 +1,16 @@
 import datetime
 import json
 import logging
+import os.path
 import ssl
 import sys
 import shutil
+import tempfile
 import warnings
 
 import mock
 import pytest
+import trustme
 
 from dummyserver.testcase import HTTPSDummyServerTestCase, IPV6HTTPSDummyServerTestCase
 from dummyserver.server import (
@@ -650,13 +653,35 @@ class TestHTTPS_TLSv1_3(TestHTTPS):
     certs = TLSv1_3_CERTS
 
 
-class TestHTTPS_NoSAN:
-    def test_warning_for_certs_without_a_san(self, no_san_server):
+class TestHTTPS_NoSAN(HTTPSDummyServerTestCase):
+    @classmethod
+    def setup_class(cls):
+        cls.tmpdir = tempfile.mkdtemp("certs")
+        ca = trustme.CA()
+        # only common name, no subject alternative names
+        server_cert = ca.issue_cert(common_name=u"localhost")
+
+        cls.ca_certs = os.path.join(cls.tmpdir, "ca.pem")
+        cls.server_cert_path = os.path.join(cls.tmpdir, "server.pem")
+        cls.server_key_path = os.path.join(cls.tmpdir, "server.key")
+
+        ca.cert_pem.write_to_path(cls.ca_certs)
+        server_cert.private_key_pem.write_to_path(cls.server_key_path)
+        server_cert.cert_chain_pems[0].write_to_path(cls.server_cert_path)
+
+        cls.certs = {"keyfile": cls.server_key_path, "certfile": cls.server_cert_path}
+        super(TestHTTPS_NoSAN, cls)._start_server()
+
+    def teardown_class(cls):
+        super(TestHTTPS_NoSAN, cls)._stop_server()
+        shutil.rmtree(cls.tmpdir)
+
+    def test_warning_for_certs_without_a_san(self):
         """Ensure that a warning is raised when the cert from the server has
         no Subject Alternative Name."""
         with mock.patch("warnings.warn") as warn:
             with HTTPSConnectionPool(
-                no_san_server.host, no_san_server.port, ca_certs=no_san_server.ca_certs
+                self.host, self.port, ca_certs=self.ca_certs
             ) as https_pool:
                 r = https_pool.request("GET", "/")
                 assert r.status == 200
