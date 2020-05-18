@@ -27,9 +27,6 @@ def tests_impl(session, extras="socks,brotli"):
     session.run("python", "--version")
     session.run("python", "-c", "import struct; print(struct.calcsize('P') * 8)")
 
-    if session.python != "pypy" and session.python != "2.7":
-        session.posargs.extend(["--random-order"])
-
     # Only require unasync to run tests
     import unasync  # please install unasync alongside nox to run tests
 
