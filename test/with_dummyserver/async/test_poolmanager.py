@@ -101,7 +101,7 @@ class TestFileUploads(HTTPDummyServerTestCase):
         # which is unsupported by BytesIO.
         headers = {"Content-Length": "8"}
 
-        with PoolManager() as http:
+        with PoolManager(backend=backend) as http:
             with pytest.raises(UnrewindableBodyError) as e:
                 await http.urlopen("PUT", url, headers=headers, body=body)
             assert "Unable to record file position for" in str(e.value)
@@ -120,7 +120,7 @@ class TestFileUploads(HTTPDummyServerTestCase):
         # which is unsupported by BytesIO.
         headers = {"Content-Length": "8"}
 
-        with PoolManager() as http:
+        with PoolManager(backend=backend) as http:
             with pytest.raises(UnrewindableBodyError) as e:
                 await http.urlopen("PUT", url, headers=headers, body=body)
             assert (
