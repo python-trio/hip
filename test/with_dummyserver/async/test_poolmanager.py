@@ -1,6 +1,7 @@
 import io
 import json
 import pytest
+from ahip.base import DEFAULT_PORTS
 from ahip import PoolManager, Retry
 from ahip.exceptions import MaxRetryError, UnrewindableBodyError
 
@@ -223,6 +224,153 @@ class TestPoolManager(HTTPDummyServerTestCase):
             )
 
             assert r.status == 303
+
+    @conftest.test_all_backends
+    async def test_raise_on_status(self, backend, anyio_backend):
+        with PoolManager(backend=backend) as http:
+            with pytest.raises(MaxRetryError):
+                # the default is to raise
+                r = await http.request(
+                    "GET",
+                    "%s/status" % self.base_url,
+                    fields={"status": "500 Internal Server Error"},
+                    retries=Retry(total=1, status_forcelist=range(500, 600)),
+                )
+
+            with pytest.raises(MaxRetryError):
+                # raise explicitly
+                r = await http.request(
+                    "GET",
+                    "%s/status" % self.base_url,
+                    fields={"status": "500 Internal Server Error"},
+                    retries=Retry(
+                        total=1, status_forcelist=range(500, 600), raise_on_status=True
+                    ),
+                )
+
+            # don't raise
+            r = await http.request(
+                "GET",
+                "%s/status" % self.base_url,
+                fields={"status": "500 Internal Server Error"},
+                retries=Retry(
+                    total=1, status_forcelist=range(500, 600), raise_on_status=False
+                ),
+            )
+
+            assert r.status == 500
+
+    @pytest.mark.parametrize(
+        ["target", "expected_target"],
+        [
+            ("/echo_uri?q=1#fragment", b"/echo_uri?q=1"),
+            ("/echo_uri?#", b"/echo_uri?"),
+            ("/echo_uri#?", b"/echo_uri"),
+            ("/echo_uri#?#", b"/echo_uri"),
+            ("/echo_uri??#", b"/echo_uri??"),
+            ("/echo_uri?%3f#", b"/echo_uri?%3F"),
+            ("/echo_uri?%3F#", b"/echo_uri?%3F"),
+            ("/echo_uri?[]", b"/echo_uri?%5B%5D"),
+        ],
+    )
+    @conftest.test_all_backends
+    async def test_encode_http_target(
+        self, target, expected_target, backend, anyio_backend
+    ):
+        with PoolManager() as http:
+            url = "http://%s:%d%s" % (self.host, self.port, target)
+            r = await http.request("GET", url)
+            assert r.data == expected_target
+
+    @conftest.test_all_backends
+    async def test_missing_port(self, backend, anyio_backend):
+        # Can a URL that lacks an explicit port like ':80' succeed, or
+        # will all such URLs fail with an error?
+
+        with PoolManager(backend=backend) as http:
+            # By globally adjusting `DEFAULT_PORTS` we pretend for a moment
+            # that HTTP's default port is not 80, but is the port at which
+            # our test server happens to be listening.
+            DEFAULT_PORTS["http"] = self.port
+            try:
+                r = await http.request("GET", "http://%s/" % self.host, retries=0)
+            finally:
+                DEFAULT_PORTS["http"] = 80
+
+            assert r.status == 200
+            assert r.data == b"Dummy server!"
+
+    @conftest.test_all_backends
+    async def test_headers(self, backend, anyio_backend):
+        with PoolManager(backend=backend, headers={"Foo": "bar"}) as http:
+            r = await http.request("GET", "%s/headers" % self.base_url)
+            returned_headers = json.loads(r.data.decode())
+            assert returned_headers.get("Foo") == "bar"
+
+            r = await http.request("POST", "%s/headers" % self.base_url)
+            returned_headers = json.loads(r.data.decode())
+            assert returned_headers.get("Foo") == "bar"
+
+            r = await http.request_encode_url("GET", "%s/headers" % self.base_url)
+            returned_headers = json.loads(r.data.decode())
+            assert returned_headers.get("Foo") == "bar"
+
+            r = await http.request_encode_body("POST", "%s/headers" % self.base_url)
+            returned_headers = json.loads(r.data.decode())
+            assert returned_headers.get("Foo") == "bar"
+
+            r = await http.request_encode_url(
+                "GET", "%s/headers" % self.base_url, headers={"Baz": "quux"}
+            )
+            returned_headers = json.loads(r.data.decode())
+            assert returned_headers.get("Foo") is None
+            assert returned_headers.get("Baz") == "quux"
+
+            r = await http.request_encode_body(
+                "GET", "%s/headers" % self.base_url, headers={"Baz": "quux"}
+            )
+            returned_headers = json.loads(r.data.decode())
+            assert returned_headers.get("Foo") is None
+            assert returned_headers.get("Baz") == "quux"
+
+    @conftest.test_all_backends
+    async def test_http_with_ssl_keywords(self, backend, anyio_backend):
+        with PoolManager(backend=backend, ca_certs="REQUIRED") as http:
+            r = await http.request("GET", "http://%s:%s/" % (self.host, self.port))
+            assert r.status == 200
+
+    @conftest.test_all_backends
+    async def test_http_with_ca_cert_dir(self, backend, anyio_backend):
+        with PoolManager(
+            backend=backend, ca_certs="REQUIRED", ca_cert_dir="/nosuchdir"
+        ) as http:
+            r = await http.request("GET", "http://%s:%s/" % (self.host, self.port))
+            assert r.status == 200
+
+    @conftest.test_all_backends
+    async def test_cleanup_on_connection_error(self, backend, anyio_backend):
+        """
+        Test that connections are recycled to the pool on
+        connection errors where no http response is received.
+        """
+        poolsize = 3
+
+        with PoolManager(backend=backend, maxsize=poolsize, block=True) as http:
+            pool = http.connection_from_host(self.host, self.port)
+            assert pool.pool.qsize() == poolsize
+
+            # force a connection error by supplying a non-existent
+            # url. We won't get a response for this  and so the
+            # conn won't be implicitly returned to the pool.
+            url = "%s/redirect" % self.base_url
+            with pytest.raises(MaxRetryError):
+                await http.request("GET", url, fields={"target": "/"}, retries=0)
+
+            r = await http.request("GET", url, fields={"target": "/"}, retries=1)
+            r.release_conn()
+
+            # the pool should still contain poolsize elements
+            assert pool.pool.qsize() == poolsize
 
 
 class TestFileUploads(HTTPDummyServerTestCase):
