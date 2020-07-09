@@ -19,8 +19,10 @@ class AnyIOBackend(AsyncBackend):
         stream = await anyio.connect_tcp(
             host, port, bind_host=bind_host, bind_port=bind_port
         )
-        for (level, optname, value) in socket_options:
-            stream.setsockopt(level, optname, value)
+
+        if socket_options:
+            for (level, optname, value) in socket_options:
+                stream.setsockopt(level, optname, value)
 
         return AnyIOSocket(stream)
 

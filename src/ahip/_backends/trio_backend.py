@@ -22,8 +22,10 @@ class TrioBackend(AsyncBackend):
             )
 
         stream = await trio.open_tcp_stream(host, port)
-        for (level, optname, value) in socket_options:
-            stream.setsockopt(level, optname, value)
+
+        if socket_options:
+            for (level, optname, value) in socket_options:
+                stream.setsockopt(level, optname, value)
 
         return TrioSocket(stream)
 
