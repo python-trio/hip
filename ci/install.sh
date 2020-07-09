@@ -9,7 +9,8 @@ set -exo pipefail
 if ! python3 -m pip --version; then
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
     sudo python3 get-pip.py
-    sudo python3 -m pip install nox unasync
+    # https://github.com/theacodes/nox/issues/328
+    sudo python3 -m pip install nox==2019.11.9 unasync
 else
     # We're not in "dual Python" mode, so we can just install Nox normally.
     python3 -m pip install nox unasync
