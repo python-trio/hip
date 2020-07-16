@@ -60,14 +60,14 @@ It also supports async/await:
 
 .. code-block:: python
 
-    import hip
+    import ahip
     import trio
 
     async def main():
-        with hip.AsyncPoolManager() as http:
+        with ahip.PoolManager() as http:
             r = await http.request("GET", "http://httpbin.org/uuid")
             print("Status:", r.status)  # 200
-            print("Data:", await r.read()). # 'User-agent: *\nDisallow: /deny\n'
+            print("Data:", r.data) # 'User-agent: *\nDisallow: /deny\n'
 
     trio.run(main)
 
