@@ -2,4 +2,4 @@
 sphinx>=1.7.0
 sphinx-rtd-theme
 sphinxcontrib-trio
-requests>=2,<2.16
+requests
