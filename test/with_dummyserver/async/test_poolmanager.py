@@ -1,15 +1,17 @@
 import io
 import json
 import pytest
+import time
 from ahip.base import DEFAULT_PORTS
 from ahip import PoolManager, Retry
 from ahip.exceptions import MaxRetryError, NewConnectionError, UnrewindableBodyError
 from hip.util.retry import RequestHistory
 
-from test.with_dummyserver import conftest
-from dummyserver.testcase import HTTPDummyServerTestCase
+from dummyserver.server import HAS_IPV6
+from dummyserver.testcase import HTTPDummyServerTestCase, IPv6HTTPDummyServerTestCase
 
 from test import LONG_TIMEOUT
+from test.with_dummyserver import conftest
 
 
 def _test_name(test_name, backend, anyio_backend):
@@ -710,3 +712,96 @@ class TestRetry(HTTPDummyServerTestCase):
                 for history in r.retries.history
             ]
             assert actual == expected
+
+
+class TestRetryAfter(HTTPDummyServerTestCase):
+    @classmethod
+    def setup_class(self):
+        super(TestRetryAfter, self).setup_class()
+        self.base_url = "http://%s:%d" % (self.host, self.port)
+        self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
+
+    @conftest.test_all_backends
+    async def test_retry_after(self, backend, anyio_backend):
+        url = "%s/retry_after" % self.base_url
+        with PoolManager(backend=backend) as http:
+            # Request twice in a second to get a 429 response.
+            r = await http.request(
+                "GET", url, fields={"status": "429 Too Many Requests"}, retries=False
+            )
+            r = await http.request(
+                "GET", url, fields={"status": "429 Too Many Requests"}, retries=False
+            )
+            assert r.status == 429
+
+            r = await http.request(
+                "GET", url, fields={"status": "429 Too Many Requests"}, retries=True
+            )
+            assert r.status == 200
+
+            # Request twice in a second to get a 503 response.
+            r = await http.request(
+                "GET", url, fields={"status": "503 Service Unavailable"}, retries=False
+            )
+            r = await http.request(
+                "GET", url, fields={"status": "503 Service Unavailable"}, retries=False
+            )
+            assert r.status == 503
+
+            r = await http.request(
+                "GET", url, fields={"status": "503 Service Unavailable"}, retries=True
+            )
+            assert r.status == 200
+
+            # Ignore Retry-After header on status which is not defined in
+            # Retry.RETRY_AFTER_STATUS_CODES.
+            r = await http.request(
+                "GET", url, fields={"status": "418 I'm a teapot"}, retries=True
+            )
+            assert r.status == 418
+
+    @conftest.test_all_backends
+    async def test_redirect_after(self, backend, anyio_backend):
+        with PoolManager(backend=backend) as http:
+            r = await http.request(
+                "GET", "%s/redirect_after" % self.base_url, retries=False
+            )
+            assert r.status == 303
+
+            t = time.time()
+            r = await http.request("GET", "%s/redirect_after" % self.base_url)
+            assert r.status == 200
+            delta = time.time() - t
+            assert delta >= 1
+
+            t = time.time()
+            timestamp = t + 2
+            r = await http.request(
+                "GET", self.base_url + "/redirect_after?date=" + str(timestamp)
+            )
+            assert r.status == 200
+            delta = time.time() - t
+            assert delta >= 1
+
+            # Retry-After is past
+            t = time.time()
+            timestamp = t - 1
+            r = await http.request(
+                "GET", self.base_url + "/redirect_after?date=" + str(timestamp)
+            )
+            delta = time.time() - t
+            assert r.status == 200
+            assert delta < 1
+
+
+@pytest.mark.skipif(not HAS_IPV6, reason="IPv6 is not supported on this system")
+class TestIPv6PoolManager(IPv6HTTPDummyServerTestCase):
+    @classmethod
+    def setup_class(cls):
+        super(TestIPv6PoolManager, cls).setup_class()
+        cls.base_url = "http://[%s]:%d" % (cls.host, cls.port)
+
+    @conftest.test_all_backends
+    async def test_ipv6(self, backend, anyio_backend):
+        with PoolManager(backend=backend) as http:
+            await http.request("GET", self.base_url)
