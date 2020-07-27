@@ -1,14 +1,21 @@
 import io
 import json
 import pytest
+import time
 from ahip.base import DEFAULT_PORTS
 from ahip import PoolManager, Retry
-from ahip.exceptions import MaxRetryError, UnrewindableBodyError
+from ahip.exceptions import MaxRetryError, NewConnectionError, UnrewindableBodyError
+from hip.util.retry import RequestHistory
 
-from test.with_dummyserver import conftest
-from dummyserver.testcase import HTTPDummyServerTestCase
+from dummyserver.server import HAS_IPV6
+from dummyserver.testcase import HTTPDummyServerTestCase, IPv6HTTPDummyServerTestCase
 
 from test import LONG_TIMEOUT
+from test.with_dummyserver import conftest
+
+
+def _test_name(test_name, backend, anyio_backend):
+    return "-".join([test_name, backend, anyio_backend or "none"])
 
 
 class TestPoolManager(HTTPDummyServerTestCase):
@@ -410,7 +417,9 @@ class TestFileUploads(HTTPDummyServerTestCase):
         data = b"A" * content_length
         uploaded_file = io.BytesIO(data)
         headers = {
-            "test-name": "test_retries_put_filehandle",
+            "test-name": _test_name(
+                "test_retries_put_filehandle", backend, anyio_backend
+            ),
             "Content-Length": str(content_length),
         }
 
@@ -465,3 +474,334 @@ class TestFileUploads(HTTPDummyServerTestCase):
                 "An error occurred when rewinding request body for redirect/retry."
                 == str(e.value)
             )
+
+
+class TestRetry(HTTPDummyServerTestCase):
+    @classmethod
+    def setup_class(self):
+        super(TestRetry, self).setup_class()
+        self.base_url = "http://%s:%d" % (self.host, self.port)
+        self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
+
+    @conftest.test_all_backends
+    async def test_max_retry(self, backend, anyio_backend):
+        with PoolManager(backend=backend) as http:
+            with pytest.raises(MaxRetryError):
+                await http.request(
+                    "GET",
+                    "%s/redirect" % self.base_url,
+                    fields={"target": "/"},
+                    retries=0,
+                )
+
+    @conftest.test_all_backends
+    async def test_disabled_retry(self, backend, anyio_backend):
+        """ Disabled retries should disable redirect handling. """
+        with PoolManager(backend=backend) as http:
+            r = await http.request(
+                "GET",
+                "%s/redirect" % self.base_url,
+                fields={"target": "/"},
+                retries=False,
+            )
+            assert r.status == 303
+
+            r = await http.request(
+                "GET",
+                "%s/redirect" % self.base_url,
+                fields={"target": "/"},
+                retries=Retry(redirect=False),
+            )
+            assert r.status == 303
+
+            with pytest.raises(NewConnectionError):
+                await http.request(
+                    "GET",
+                    "http://thishostdoesnotexist.invalid/",
+                    timeout=0.001,
+                    retries=False,
+                )
+
+    @conftest.test_all_backends
+    async def test_read_retries(self, backend, anyio_backend):
+        """ Should retry for status codes in the whitelist """
+        retry = Retry(read=1, status_forcelist=[418])
+
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "GET",
+                "%s/successful_retry" % self.base_url,
+                headers={
+                    "test-name": _test_name("test_read_retries", backend, anyio_backend)
+                },
+                retries=retry,
+            )
+            assert resp.status == 200
+
+    @conftest.test_all_backends
+    async def test_read_total_retries(self, backend, anyio_backend):
+        """ HTTP response w/ status code in the whitelist should be retried """
+        headers = {
+            "test-name": _test_name("test_read_total_retries", backend, anyio_backend)
+        }
+        retry = Retry(total=1, status_forcelist=[418])
+
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "GET",
+                "%s/successful_retry" % self.base_url,
+                headers=headers,
+                retries=retry,
+            )
+            assert resp.status == 200
+
+    @conftest.test_all_backends
+    async def test_retries_wrong_whitelist(self, backend, anyio_backend):
+        """HTTP response w/ status code not in whitelist shouldn't be retried"""
+        headers = {
+            "test-name": _test_name("test_wrong_whitelist", backend, anyio_backend)
+        }
+        retry = Retry(total=1, status_forcelist=[202])
+
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "GET",
+                "%s/successful_retry" % self.base_url,
+                retries=retry,
+                headers=headers,
+            )
+            assert resp.status == 418
+
+    @conftest.test_all_backends
+    async def test_default_method_whitelist_retried(self, backend, anyio_backend):
+        """Hip should retry methods in the default method whitelist"""
+        headers = {
+            "test-name": _test_name("test_default_whitelist", backend, anyio_backend)
+        }
+        retry = Retry(total=1, status_forcelist=[418])
+
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "OPTIONS",
+                "%s/successful_retry" % self.base_url,
+                headers=headers,
+                retries=retry,
+            )
+            assert resp.status == 200
+
+    @conftest.test_all_backends
+    async def test_retries_wrong_method_list(self, backend, anyio_backend):
+        """Method not in our whitelist should not be retried, even if code matches"""
+        headers = {
+            "test-name": _test_name(
+                "test_wrong_method_whitelist", backend, anyio_backend
+            )
+        }
+        retry = Retry(total=1, status_forcelist=[418], method_whitelist=["POST"])
+
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "GET",
+                "%s/successful_retry" % self.base_url,
+                headers=headers,
+                retries=retry,
+            )
+            assert resp.status == 418
+
+    @conftest.test_all_backends
+    async def test_read_retries_unsuccessful(self, backend, anyio_backend):
+        headers = {
+            "test-name": _test_name(
+                "test_read_retries_unsuccessful", backend, anyio_backend
+            )
+        }
+
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "GET", "%s/successful_retry" % self.base_url, headers=headers, retries=1
+            )
+            assert resp.status == 418
+
+    @conftest.test_all_backends
+    async def test_retry_reuse_safe(self, backend, anyio_backend):
+        """ It should be possible to reuse a Retry object across requests """
+        headers = {"test-name": _test_name("test_retry_safe", backend, anyio_backend)}
+        retry = Retry(total=1, status_forcelist=[418])
+
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "GET",
+                "%s/successful_retry" % self.base_url,
+                headers=headers,
+                retries=retry,
+            )
+            assert resp.status == 200
+            resp = await http.request(
+                "GET",
+                "%s/successful_retry" % self.base_url,
+                headers=headers,
+                retries=retry,
+            )
+            assert resp.status == 200
+
+    @conftest.test_all_backends
+    async def test_retry_return_in_response(self, backend, anyio_backend):
+        headers = {
+            "test-name": _test_name(
+                "test_retry_return_in_response", backend, anyio_backend
+            )
+        }
+        retry = Retry(total=2, status_forcelist=[418])
+
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "GET",
+                "%s/successful_retry" % self.base_url,
+                headers=headers,
+                retries=retry,
+            )
+            assert resp.status == 200
+            assert resp.retries.total == 1
+            assert resp.retries.history == (
+                RequestHistory("GET", "/successful_retry", None, 418, None),
+            )
+
+    @conftest.test_all_backends
+    async def test_retry_redirect_history(self, backend, anyio_backend):
+        with PoolManager(backend=backend) as http:
+            resp = await http.request(
+                "GET", "%s/redirect" % self.base_url, fields={"target": "/"}
+            )
+            assert resp.status == 200
+            assert resp.retries.history == (
+                RequestHistory(
+                    "GET", self.base_url + "/redirect?target=%2F", None, 303, "/"
+                ),
+            )
+
+    @conftest.test_all_backends
+    async def test_multi_redirect_history(self, backend, anyio_backend):
+        with PoolManager(backend=backend) as http:
+            r = await http.request(
+                "GET",
+                "%s/multi_redirect" % self.base_url,
+                fields={"redirect_codes": "303,302,200"},
+                redirect=False,
+            )
+            assert r.status == 303
+            assert r.retries.history == tuple()
+
+            r = await http.request(
+                "GET",
+                "%s/multi_redirect" % self.base_url,
+                retries=10,
+                fields={"redirect_codes": "303,302,301,307,302,200"},
+            )
+            assert r.status == 200
+            assert r.data == b"Done redirecting"
+
+            expected = [
+                (303, "/multi_redirect?redirect_codes=302,301,307,302,200"),
+                (302, "/multi_redirect?redirect_codes=301,307,302,200"),
+                (301, "/multi_redirect?redirect_codes=307,302,200"),
+                (307, "/multi_redirect?redirect_codes=302,200"),
+                (302, "/multi_redirect?redirect_codes=200"),
+            ]
+            actual = [
+                (history.status, history.redirect_location)
+                for history in r.retries.history
+            ]
+            assert actual == expected
+
+
+class TestRetryAfter(HTTPDummyServerTestCase):
+    @classmethod
+    def setup_class(self):
+        super(TestRetryAfter, self).setup_class()
+        self.base_url = "http://%s:%d" % (self.host, self.port)
+        self.base_url_alt = "http://%s:%d" % (self.host_alt, self.port)
+
+    @conftest.test_all_backends
+    async def test_retry_after(self, backend, anyio_backend):
+        url = "%s/retry_after" % self.base_url
+        with PoolManager(backend=backend) as http:
+            # Request twice in a second to get a 429 response.
+            r = await http.request(
+                "GET", url, fields={"status": "429 Too Many Requests"}, retries=False
+            )
+            r = await http.request(
+                "GET", url, fields={"status": "429 Too Many Requests"}, retries=False
+            )
+            assert r.status == 429
+
+            r = await http.request(
+                "GET", url, fields={"status": "429 Too Many Requests"}, retries=True
+            )
+            assert r.status == 200
+
+            # Request twice in a second to get a 503 response.
+            r = await http.request(
+                "GET", url, fields={"status": "503 Service Unavailable"}, retries=False
+            )
+            r = await http.request(
+                "GET", url, fields={"status": "503 Service Unavailable"}, retries=False
+            )
+            assert r.status == 503
+
+            r = await http.request(
+                "GET", url, fields={"status": "503 Service Unavailable"}, retries=True
+            )
+            assert r.status == 200
+
+            # Ignore Retry-After header on status which is not defined in
+            # Retry.RETRY_AFTER_STATUS_CODES.
+            r = await http.request(
+                "GET", url, fields={"status": "418 I'm a teapot"}, retries=True
+            )
+            assert r.status == 418
+
+    @conftest.test_all_backends
+    async def test_redirect_after(self, backend, anyio_backend):
+        with PoolManager(backend=backend) as http:
+            r = await http.request(
+                "GET", "%s/redirect_after" % self.base_url, retries=False
+            )
+            assert r.status == 303
+
+            t = time.time()
+            r = await http.request("GET", "%s/redirect_after" % self.base_url)
+            assert r.status == 200
+            delta = time.time() - t
+            assert delta >= 1
+
+            t = time.time()
+            timestamp = t + 2
+            r = await http.request(
+                "GET", self.base_url + "/redirect_after?date=" + str(timestamp)
+            )
+            assert r.status == 200
+            delta = time.time() - t
+            assert delta >= 1
+
+            # Retry-After is past
+            t = time.time()
+            timestamp = t - 1
+            r = await http.request(
+                "GET", self.base_url + "/redirect_after?date=" + str(timestamp)
+            )
+            delta = time.time() - t
+            assert r.status == 200
+            assert delta < 1
+
+
+@pytest.mark.skipif(not HAS_IPV6, reason="IPv6 is not supported on this system")
+class TestIPv6PoolManager(IPv6HTTPDummyServerTestCase):
+    @classmethod
+    def setup_class(cls):
+        super(TestIPv6PoolManager, cls).setup_class()
+        cls.base_url = "http://[%s]:%d" % (cls.host, cls.port)
+
+    @conftest.test_all_backends
+    async def test_ipv6(self, backend, anyio_backend):
+        with PoolManager(backend=backend) as http:
+            await http.request("GET", self.base_url)
