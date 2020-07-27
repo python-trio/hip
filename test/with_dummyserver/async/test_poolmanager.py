@@ -15,7 +15,7 @@ from test.with_dummyserver import conftest
 
 
 def _test_name(test_name, backend, anyio_backend):
-    return "-".join([test_name, backend, anyio_backend or "None"])
+    return "-".join([test_name, backend, anyio_backend or "none"])
 
 
 class TestPoolManager(HTTPDummyServerTestCase):
