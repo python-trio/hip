@@ -67,7 +67,7 @@ class Request(object):
         if b"host" not in self.headers:
             # We test against a sentinel object here to forcibly always insert
             # the port for schemes we don't understand.
-            if port is DEFAULT_PORTS.get(scheme, object()):
+            if port == DEFAULT_PORTS.get(scheme, object()):
                 header = host
             else:
                 header = "{}:{}".format(host, port)

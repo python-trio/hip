@@ -73,3 +73,19 @@ class TestConnection(object):
         assert body_bytes[1] in second_packet
         with pytest.raises(StopIteration):
             next(iterable)
+
+    def test_request_default_port_handling(self):
+        # Verify that the port is only included in the Host header when it
+        # is necessary.  In other words, when the specified port does not
+        # match the port for a KNOWN protocol
+        request = Request(method=b"GET", target="/")
+        request.add_host("httpbin.org", port=80, scheme="http")
+        assert request.headers["host"] == "httpbin.org"
+
+        request = Request(method=b"GET", target="/")
+        request.add_host("httpbin.org", port=443, scheme="https")
+        assert request.headers["host"] == "httpbin.org"
+
+        request = Request(method=b"GET", target="/")
+        request.add_host("httpbin.org", port=5672, scheme="amqp")
+        assert request.headers["host"] == "httpbin.org:5672"
