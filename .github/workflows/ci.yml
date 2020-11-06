@@ -9,9 +9,9 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install dependencies
@@ -30,9 +30,9 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install dependencies
@@ -46,9 +46,9 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install dependencies
@@ -57,9 +57,9 @@ jobs:
       - name: Build the docs
         run: nox -s docs
 
-  macOS:
-    runs-on: macos-latest
-    
+  ubuntu:
+    runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
@@ -67,14 +67,14 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Set Up Python 3.7 to run nox
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Set Up Python - ${{ matrix.python-version }}
         if: matrix.python_version != '3.7'
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Dependencies
@@ -86,11 +86,11 @@ jobs:
       - name: Upload Coverage
         run: ./ci/upload_coverage.sh
         env:
-          JOB_NAME: 'macOS (${{ matrix.python-version }})'
+          JOB_NAME: "ubuntu (${{ matrix.python-version }})"
 
-  Windows:
-    runs-on: windows-latest
-    
+  macOS:
+    runs-on: macos-latest
+
     strategy:
       fail-fast: false
       matrix:
@@ -98,14 +98,45 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Set Up Python 3.7 to run nox
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Set Up Python - ${{ matrix.python-version }}
         if: matrix.python_version != '3.7'
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          python3.7 -m pip install nox unasync
+      - name: Run Tests
+        run: |
+          nox -s test-${{ matrix.python-version }}
+      - name: Upload Coverage
+        run: ./ci/upload_coverage.sh
+        env:
+          JOB_NAME: "macOS (${{ matrix.python-version }})"
+
+  Windows:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set Up Python 3.7 to run nox
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Set Up Python - ${{ matrix.python-version }}
+        if: matrix.python_version != '3.7'
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies (Windows)
@@ -120,4 +151,4 @@ jobs:
         run: ./ci/upload_coverage.sh
         shell: bash
         env:
-          JOB_NAME: 'Windows (${{ matrix.python-version }})'
+          JOB_NAME: "Windows (${{ matrix.python-version }})"
