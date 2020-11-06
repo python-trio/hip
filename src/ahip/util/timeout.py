@@ -16,7 +16,7 @@ current_time = getattr(time, "monotonic", time.time)
 
 
 class Timeout(object):
-    """ Timeout configuration.
+    """Timeout configuration.
 
     Timeouts can be defined as a default for a pool::
 
@@ -107,7 +107,7 @@ class Timeout(object):
 
     @classmethod
     def _validate_timeout(cls, value, name):
-        """ Check that a timeout attribute is valid.
+        """Check that a timeout attribute is valid.
 
         :param value: The timeout value to validate
         :param name: The name of the timeout attribute to validate. This is
@@ -153,7 +153,7 @@ class Timeout(object):
 
     @classmethod
     def from_float(cls, timeout):
-        """ Create a new Timeout from a legacy timeout value.
+        """Create a new Timeout from a legacy timeout value.
 
         The timeout value used by httplib.py sets the same timeout on the
         connect(), and recv() socket requests. This creates a :class:`Timeout`
@@ -168,7 +168,7 @@ class Timeout(object):
         return Timeout(read=timeout, connect=timeout)
 
     def clone(self):
-        """ Create a copy of the timeout object
+        """Create a copy of the timeout object
 
         Timeout properties are stored per-pool but each request needs a fresh
         Timeout object to ensure each one has its own start/stop configured.
@@ -182,7 +182,7 @@ class Timeout(object):
         return Timeout(connect=self._connect, read=self._read, total=self.total)
 
     def start_connect(self):
-        """ Start the timeout clock, used during a connect() attempt
+        """Start the timeout clock, used during a connect() attempt
 
         :raises hip.exceptions.TimeoutStateError: if you attempt
             to start a timer that has been started already.
@@ -193,7 +193,7 @@ class Timeout(object):
         return self._start_connect
 
     def get_connect_duration(self):
-        """ Gets the time elapsed since the call to :meth:`start_connect`.
+        """Gets the time elapsed since the call to :meth:`start_connect`.
 
         :return: Elapsed time in seconds.
         :rtype: float
@@ -208,7 +208,7 @@ class Timeout(object):
 
     @property
     def connect_timeout(self):
-        """ Get the value to use when setting a connection timeout.
+        """Get the value to use when setting a connection timeout.
 
         This will be a positive float or integer, the value None
         (never timeout), or the default system timeout.
@@ -226,7 +226,7 @@ class Timeout(object):
 
     @property
     def read_timeout(self):
-        """ Get the value for the read timeout.
+        """Get the value for the read timeout.
 
         This assumes some time has elapsed in the connection timeout and
         computes the read timeout appropriately.
